@@ -5,7 +5,7 @@ namespace Shared.DTO;
 public class AggregatesResultDTO
 {
     [JsonPropertyName("v")]
-    public int V { get; set; }
+    public double V { get; set; }
 
     [JsonPropertyName("vw")]
     public double Vw { get; set; }
@@ -23,10 +23,10 @@ public class AggregatesResultDTO
     public double L { get; set; }
 
     [JsonPropertyName("t")]
-    public object T { get; set; }
+    public double T { get; set; }
 
     [JsonPropertyName("n")]
-    public int N { get; set; }
+    public double N { get; set; }
 }
 
 public class AggregatesDTO

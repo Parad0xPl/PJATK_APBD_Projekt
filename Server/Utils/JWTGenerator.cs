@@ -34,7 +34,7 @@ public class JWTGenerator
         var claims = new List<Claim>
         {
             new("ID", account.ID.ToString()),
-            new(JwtRegisteredClaimNames.UniqueName, account.Login),
+            new(ClaimTypes.Name, account.Login),
             new(ClaimTypes.Role, "User")
         };
 
