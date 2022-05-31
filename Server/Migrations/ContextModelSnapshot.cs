@@ -9,7 +9,7 @@ using Server.Entities;
 
 namespace Server.Migrations
 {
-    [DbContext(typeof(Context))]
+    [DbContext(typeof(StockContext))]
     partial class ContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

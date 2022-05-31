@@ -10,15 +10,15 @@ public class StockController : ControllerBase
 {
     [HttpGet]
     [Route("{name}")]
-    public async Task GetStock(string name)
+    public async Task<IActionResult> GetStock(string name)
     {
-        return;
+        return Ok();
     }
 
     [HttpPut]
     [Route("watchlist/{name}")]
-    public async Task AddToWatchlist(string name)
+    public async Task<IActionResult> AddToWatchlist(string name)
     {
-        
+        return Ok();
     }
 }

@@ -10,7 +10,7 @@ using Server.Entities;
 
 namespace Server.Migrations
 {
-    [DbContext(typeof(Context))]
+    [DbContext(typeof(StockContext))]
     [Migration("20220530223654_Init")]
     partial class Init
     {
