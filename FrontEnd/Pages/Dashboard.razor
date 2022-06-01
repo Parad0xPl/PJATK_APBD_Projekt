@@ -7,55 +7,29 @@
 @using FrontEnd.Utils
 @inject ApiClient _HttpClient
 
-<SfDashboardLayout>
-<DashboardLayoutPanels>
-    <DashboardLayoutPanel>
-        <HeaderTemplate><div>Graph</div></HeaderTemplate>
-        <ContentTemplate>
-            <StockInfo Symbol="TSLA"></StockInfo>
-        </ContentTemplate>
-    </DashboardLayoutPanel>
-    <DashboardLayoutPanel>
-        <HeaderTemplate><div>Company symbol</div></HeaderTemplate>
-        <ContentTemplate>
-            <SfAutoComplete TValue="string" TItem="SearchData" Placeholder="e.g. Basketball" DataSource="@SearchItems">
-                <AutoCompleteFieldSettings Value="Ticker"/>
-                <AutoCompleteTemplates TItem="SearchData">
-                    <ItemTemplate>
-                        <div>
-                            <span class="ticker">@((context as SearchData).Ticker)</span>
-                            <span class="name">@((context as SearchData).Name)</span>
-                            <span class="exchange">@((context as SearchData).PrimaryExchange)</span>
-                        </div>
-                    </ItemTemplate>
-                </AutoCompleteTemplates>
-            </SfAutoComplete>
-            <NavLink href="watchlist">
-                <SfButton>Watchlist</SfButton>
-            </NavLink>
-        </ContentTemplate>
-    </DashboardLayoutPanel>
-</DashboardLayoutPanels>
-</SfDashboardLayout>
- 
-<style>
-.e-panel-header {
-    background-color: rgba(0, 0, 0, .1);
-    text-align: center;
-}
-.e-panel-content {
-    text-align: center;
-    margin-top: 10px;
-}
-</style>
+<div>Company symbol</div>
+<SfAutoComplete TValue="string" TItem="SearchData" Placeholder="e.g. Basketball" DataSource="@SearchItems">
+    <AutoCompleteFieldSettings Value="Ticker"/>
+    <AutoCompleteTemplates TItem="SearchData">
+        <ItemTemplate>
+            <div>
+                <span class="ticker">@((context as SearchData).Ticker)</span>
+                <span class="name">@((context as SearchData).Name)</span>
+                <span class="exchange">@((context as SearchData).PrimaryExchange)</span>
+            </div>
+        </ItemTemplate>
+    </AutoCompleteTemplates>
+</SfAutoComplete>
+<NavLink href="watchlist">
+    <SfButton>Watchlist</SfButton>
+</NavLink>
+<div>Graph</div>
+<StockInfo Symbol="TSLA"></StockInfo>
 
 @code {
-    Type models = typeof(SearchData);
     public async Task<IEnumerable<SearchData>> GetSearch(string value)
     {
         var search = await _httpClient.GetSearch(value);
-        Console.WriteLine(search);
-        Console.WriteLine(search.Select(e => e.Ticker).ToArray());
         return search ?? new SearchData[]{};
     }
 
@@ -67,22 +41,5 @@
 
     public IEnumerable<SearchData> SearchItems { get; set; }
 
-    public class GameFields
-    {
-        public string ID { get; set; } = null!;
-        public string Text { get; set; } = null!;
-    }
-    public List<GameFields> Games = new List<GameFields>()
-    {
-        new GameFields(){ ID= "Game1", Text= "American Football" },
-        new GameFields(){ ID= "Game2", Text= "Badminton" },
-        new GameFields(){ ID= "Game3", Text= "Basketball" },
-        new GameFields(){ ID= "Game4", Text= "Cricket" },
-        new GameFields(){ ID= "Game5", Text= "Football" },
-        new GameFields(){ ID= "Game6", Text= "Golf" },
-        new GameFields(){ ID= "Game7", Text= "Hockey" },
-        new GameFields(){ ID= "Game8", Text= "Rugby"},
-        new GameFields(){ ID= "Game9", Text= "Snooker" },
-        new GameFields(){ ID= "Game10",Text= "Tennis"}
-    };
+
 }
