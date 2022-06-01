@@ -16,7 +16,7 @@
 </SfGrid>
 
 @code {
-    public List<Order> Orders { get; set; }
+    private List<Order> Orders { get; set; } = null!;
  
     protected override void OnInitialized()
     {
@@ -33,7 +33,7 @@
     public class Order {
         public int ID { get; set; }
         public int? OrderID { get; set; }
-        public string CustomerID { get; set; }
+        public string CustomerID { get; set; } = null!;
         public DateTime? OrderDate { get; set; }
         public double? Freight { get; set; }
     }
@@ -41,11 +41,11 @@
     public class Details
     {
         public int ID { get; set; }
-        public string ImageURL { get; set; }
-        public string Symbol { get; set; }
-        public string Name { get; set; }
-        public string Sector { get; set; }
-        public string Country { get; set; }
-        public string Ceo { get; set; }
+        public string ImageURL { get; set; } = null!;
+        public string Symbol { get; set; } = null!;
+        public string Name { get; set; } = null!;
+        public string Sector { get; set; } = null!;
+        public string Country { get; set; } = null!;
+        public string Ceo { get; set; } = null!;
     }
 }

@@ -1,6 +1,7 @@
 ﻿@using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Charts
 @using global::Shared.DTO
+@using FrontEnd.Utils
 
 
 @if (details != null)
@@ -29,7 +30,7 @@
 
 
 
-@inject HttpClient _HttpClient
+@inject ApiClient _HttpClient
 @code {
     private TickerDetailsDTO? details { get; set; }
     
@@ -38,14 +39,12 @@
 
     public async Task Fetch(string symbol)
     {
-        using var response = await _HttpClient.GetAsync($"/api/Stock/{symbol}");
-
-        if (!response.IsSuccessStatusCode)
+        var response = await _HttpClient.GetDetails(symbol);
+        if (response == null)
         {
             return;
         }
-        
-        details = await response.Content.ReadFromJsonAsync<TickerDetailsDTO>();
+        details = response;
     }
 
     protected override async Task OnInitializedAsync()

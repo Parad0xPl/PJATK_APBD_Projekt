@@ -3,7 +3,15 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Buttons
 @using global::Shared.DTO
+@using FrontEnd.Utils
+@using System.Net
 @inject NavigationManager Nav
+
+@if(ErrorMessage != null){
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
 
 <SfTextBox Placeholder="Login" @bind-Value="UserLogin"></SfTextBox><br>
 <SfTextBox Placeholder="Password" Type="InputType.Password" @bind-Value="UserPassword"></SfTextBox><br>
@@ -20,14 +28,17 @@
     }
     </style>
 
-@inject HttpClient _HttpClient
+@inject ApiClient _HttpClient
 @code {
     private string UserLogin { get; set; }
     private string UserPassword { get; set; }
+    
+    private string? ErrorMessage { get; set; }
 
     private async Task PostLogin()
     {
-
+        ErrorMessage = null;
+        
         var LoginData = new LoginDataDTO
         {
             Login = UserLogin,
@@ -35,29 +46,28 @@
         };
         var result = await _HttpClient.PostAsJsonAsync("/api/login", LoginData);
 
+
         if (!result.IsSuccessStatusCode)
         {
-            //TODO Handle error
-            Console.Write("Can't login");
+            if (result.StatusCode == HttpStatusCode.InternalServerError)
+            {
+                ErrorMessage = await result.Content.ReadAsStringAsync();
+            }
+            if (ErrorMessage == null || ErrorMessage.Trim().Length == 0)
+            {
+                ErrorMessage = result.ReasonPhrase;
+            }
+            Console.WriteLine(result.Content.ToString());
+            Console.WriteLine();
             return;
         }
 
         var response = await result.Content.ReadFromJsonAsync<LoginResponseDTO>();
-        
-        var authName =
-        "Authorization";
-        var hasAuth = _HttpClient
-            .DefaultRequestHeaders
-            .Contains(authName);
-        if (hasAuth)
+
+        if (response != null)
         {
-            _HttpClient
-                .DefaultRequestHeaders
-                .Remove(authName);
+            _HttpClient.SetAuthorization(response.JWTToken);
         }
-        _HttpClient
-            .DefaultRequestHeaders
-            .Add(authName, "Bearer " + response.JWTToken);
 
         Nav.NavigateTo("/dashboard");
         
