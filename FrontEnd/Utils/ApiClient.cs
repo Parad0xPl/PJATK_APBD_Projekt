@@ -5,7 +5,7 @@ using Shared.DTO;
 
 namespace FrontEnd.Utils;
 
-public class ApiClient : HttpClient
+public partial class ApiClient : HttpClient
 {
     private ISyncLocalStorageService? _localStorage;
 
@@ -52,31 +52,52 @@ public class ApiClient : HttpClient
         return true;
     }
 
-    public async Task<TickerDetailsDTO?> GetDetails(string name)
+    private async Task<HttpResponseMessage> GetWithRefreshCheck(string url, bool firstRun = true)
     {
-        using var response = await this.GetAsync($"/api/Stock/{name}");
-
-        if (!response.IsSuccessStatusCode)
+        var response = await GetAsync(url);
+        if (!response.IsSuccessStatusCode && firstRun)
         {
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 var refreshToken = await RefreshToken();
                 if (!refreshToken)
                 {
-                    return null;
+                    return response;
                 }
-
-                return await GetDetails(name);
-            }
-            else
-            {
-                
-                return null;
+                response.Dispose();
+                return await GetWithRefreshCheck(url, false);
             }
         }
+        return response;
+    }
 
+    public async Task<TickerDetailsDTO?> GetDetails(string name)
+    {
+        using var response = await GetWithRefreshCheck($"/api/Stock/{name}");
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
         var details = await response.Content.ReadFromJsonAsync<TickerDetailsDTO>();
         return details;
+    }
 
+    public async Task<IEnumerable<SearchData>?> GetSearch(string name)
+    {
+        using var response = await GetWithRefreshCheck($"/api/Stock/search/{name}");
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        var details = await response.Content
+            .ReadFromJsonAsync<TickerSearchDTO>();
+        
+        var searchAutocomplete = details
+            .Results
+            .Select(e => 
+                new SearchData(e.Ticker, e.Name, e.PrimaryExchange))
+            .ToList();
+        return searchAutocomplete;
     }
 }

@@ -5,6 +5,7 @@
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Buttons
 @using FrontEnd.Utils
+@inject ApiClient _HttpClient
 
 <SfDashboardLayout>
 <DashboardLayoutPanels>
@@ -17,8 +18,17 @@
     <DashboardLayoutPanel>
         <HeaderTemplate><div>Company symbol</div></HeaderTemplate>
         <ContentTemplate>
-            <SfAutoComplete TValue="string" TItem="GameFields" Placeholder="e.g. Basketball" DataSource="@Games">
-                <AutoCompleteFieldSettings Value="Text"/>
+            <SfAutoComplete TValue="string" TItem="SearchData" Placeholder="e.g. Basketball" DataSource="@SearchItems">
+                <AutoCompleteFieldSettings Value="Ticker"/>
+                <AutoCompleteTemplates TItem="SearchData">
+                    <ItemTemplate>
+                        <div>
+                            <span class="ticker">@((context as SearchData).Ticker)</span>
+                            <span class="name">@((context as SearchData).Name)</span>
+                            <span class="exchange">@((context as SearchData).PrimaryExchange)</span>
+                        </div>
+                    </ItemTemplate>
+                </AutoCompleteTemplates>
             </SfAutoComplete>
             <NavLink href="watchlist">
                 <SfButton>Watchlist</SfButton>
@@ -40,8 +50,23 @@
 </style>
 
 @code {
+    Type models = typeof(SearchData);
+    public async Task<IEnumerable<SearchData>> GetSearch(string value)
+    {
+        var search = await _httpClient.GetSearch(value);
+        Console.WriteLine(search);
+        Console.WriteLine(search.Select(e => e.Ticker).ToArray());
+        return search ?? new SearchData[]{};
+    }
 
-    
+    protected override async Task OnInitializedAsync()
+    {
+        SearchItems = await GetSearch("TL");
+        await base.OnInitializedAsync();
+    }
+
+    public IEnumerable<SearchData> SearchItems { get; set; }
+
     public class GameFields
     {
         public string ID { get; set; } = null!;
