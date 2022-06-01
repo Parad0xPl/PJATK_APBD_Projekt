@@ -22,7 +22,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost]
-    [Route("/login")]
+    [Route("login")]
     public async Task<IActionResult> Login([FromBody] LoginDataDTO loginData)
     {
         var user = await _stockContext.Accounts
@@ -47,7 +47,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost]
-    [Route("/register")]
+    [Route("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDataDTO registerData)
     {
         var user = await _stockContext.Accounts
@@ -81,7 +81,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet]
-    [Route("/refresh")]
+    [Route("refresh")]
     public async Task<IActionResult> RefreshToken()
     {
         var headersAuthorization = Request.Headers.Authorization[0];

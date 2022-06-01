@@ -1,5 +1,13 @@
-﻿@page "/Register"
+﻿@page "/register"
 <h3>Register</h3>
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+
+<SfTextBox Placeholder="Login"></SfTextBox><br>
+<SfTextBox Placeholder="Password" Type="InputType.Password"></SfTextBox><br>
+<SfTextBox Placeholder="Repeat Password" Type="InputType.Password"></SfTextBox><br>
+<SfTextBox Placeholder="Email"></SfTextBox><br>
+<SfButton>Register</SfButton><SfButton>Cancel</SfButton>
 
 @code {
     

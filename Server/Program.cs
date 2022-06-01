@@ -69,6 +69,8 @@ builder.Services.AddAuthentication(opts =>
     };
 });
 
+builder.Services.AddRazorPages();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -92,7 +94,9 @@ app.UseAuthorization();
 //     endpoints.MapControllers();
 //     endpoints.MapFallbackToFile("index.html");
 // });
+// app.MapRazorPages();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 
 JWTGenerator.Init(builder.Configuration.GetValue<string>("JWTToken"));

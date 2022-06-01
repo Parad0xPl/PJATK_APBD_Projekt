@@ -1,6 +1,65 @@
-﻿@page "/Login"
+﻿@page "/login"
 <h3>Login</h3>
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+@using global::Shared.DTO
+@inject NavigationManager Nav
 
+<SfTextBox Placeholder="Login" @bind-Value="UserLogin"></SfTextBox><br>
+<SfTextBox Placeholder="Password" Type="InputType.Password" @bind-Value="UserPassword"></SfTextBox><br>
+<SfButton @onclick="PostLogin">Login</SfButton><SfButton>Register</SfButton>
+ 
+    <style>
+    .e-panel-header {
+        background-color: rgba(0, 0, 0, .1);
+        text-align: center;
+    }
+    .e-panel-content {
+        text-align: center;
+        margin-top: 10px;
+    }
+    </style>
+
+@inject HttpClient _HttpClient
 @code {
-    
+    private string UserLogin { get; set; }
+    private string UserPassword { get; set; }
+
+    private async Task PostLogin()
+    {
+
+        var LoginData = new LoginDataDTO
+        {
+            Login = UserLogin,
+            Password = UserPassword
+        };
+        var result = await _HttpClient.PostAsJsonAsync("/api/login", LoginData);
+
+        if (!result.IsSuccessStatusCode)
+        {
+            //TODO Handle error
+            Console.Write("Can't login");
+            return;
+        }
+
+        var response = await result.Content.ReadFromJsonAsync<LoginResponseDTO>();
+        
+        var authName =
+        "Authorization";
+        var hasAuth = _HttpClient
+            .DefaultRequestHeaders
+            .Contains(authName);
+        if (hasAuth)
+        {
+            _HttpClient
+                .DefaultRequestHeaders
+                .Remove(authName);
+        }
+        _HttpClient
+            .DefaultRequestHeaders
+            .Add(authName, "Bearer " + response.JWTToken);
+
+        Nav.NavigateTo("/dashboard");
+        
+    }
 }
