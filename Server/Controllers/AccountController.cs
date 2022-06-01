@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using Server.Entities;
 using Server.Services;
 using Server.Utils;
@@ -14,7 +15,10 @@ public class AccountController : ControllerBase
 {
     private readonly StockContext _stockContext;
     private readonly IRefreshTokenService _refreshTokenService;
-
+    private readonly CookieOptions opts = new CookieOptions
+    {
+        Expires = DateTimeOffset.Now.AddDays(7)
+    };
     public AccountController(StockContext stockContext, IRefreshTokenService refreshTokenService)
     {
         _stockContext = stockContext;
@@ -39,10 +43,12 @@ public class AccountController : ControllerBase
         }
 
         var refreshToken = await _refreshTokenService.GetNewTokenAsync(user) ?? "";
+
+        Response.Cookies.Append("Refresh-Token", refreshToken, opts);
+        
         return Ok(new LoginResponseDTO
         {
-            JWTToken = JWTGenerator.Generate(user),
-            RefreshToken = refreshToken
+            JWTToken = JWTGenerator.Generate(user)
         });
     }
 
@@ -90,7 +96,7 @@ public class AccountController : ControllerBase
             return BadRequest();
         }
 
-        var refreshToken = Request.Headers["Refresh-Token"][0];
+        var refreshToken = Request.Cookies["Refresh-Token"];
         if (refreshToken == null)
         {
             return BadRequest();
@@ -116,9 +122,9 @@ public class AccountController : ControllerBase
         var newToken = JWTGenerator.GenerateForPayload(jwtSecurityToken.Payload);
         var newRefreshToken = await _refreshTokenService.GetNewTokenAsync(accountId);
         
+        Response.Cookies.Append("Refresh-Token", newRefreshToken, opts);
         return Ok(new LoginResponseDTO
         {
-            RefreshToken = newRefreshToken,
             JWTToken = newToken
         });
     }

@@ -23,6 +23,7 @@ public class JWTGenerator
         Claim claimExpDate = new Claim(JwtRegisteredClaimNames.Exp, 
             new DateTimeOffset(DateTime.Now.AddMinutes(5)).ToUnixTimeSeconds().ToString(),
             ClaimValueTypes.Integer64);
+        payload.Remove(JwtRegisteredClaimNames.Exp);
         payload.AddClaim(claimExpDate);
         var jwtToken = new JwtSecurityToken(jwtHeader, payload);
         
