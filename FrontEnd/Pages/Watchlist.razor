@@ -1,51 +1,33 @@
 ﻿@page "/watchlist"
 <h3>Watchlist</h3>
 @using Syncfusion.Blazor.Grids
+@using FrontEnd.Utils
+@inject ApiClient _httpClient
 
-<SfGrid DataSource="@Orders">
-   <GridColumns>
-       @foreach (var prop in typeof(Order).GetProperties())
-       {
-           @if (@prop.Name != "ID")
-           {
-               <GridColumn Field="@prop.Name" IsPrimaryKey="@(prop.Name == "OrderID")" AllowEditing="@prop.CanWrite"></GridColumn>
-           }
-       }
-       <GridColumn Field="Options"></GridColumn>
-   </GridColumns>
+<SfGrid DataSource="@DetailsList">
+    <GridColumns>
+        @foreach (var prop in typeof(WatchlistData).GetProperties())
+        {
+            @if (@prop.Name != "ID")
+            {
+                <GridColumn Field="@prop.Name" IsPrimaryKey="@(prop.Name == "OrderID")" AllowEditing="@prop.CanWrite"></GridColumn>
+            }
+        }
+        <GridColumn Field="Options"></GridColumn>
+    </GridColumns>
 </SfGrid>
 
 @code {
-    private List<Order> Orders { get; set; } = null!;
+    private List<WatchlistData> DetailsList { get; set; } = null!;
  
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Orders = Enumerable.Range(1, 75).Select(x => new Order()
+        var watchlist = await _httpClient.GetWatchlist();
+        if (watchlist == null)
         {
-            ID = x,
-            OrderID = 1000 + x,
-            CustomerID = (new string[] { "ALFKI", "ANANTR", "ANTON", "BLONP", "BOLID" })[new Random().Next(5)],
-            Freight = 2.1 * x,
-            OrderDate = DateTime.Now.AddDays(-x),
-        }).ToList();
-    }
- 
-    public class Order {
-        public int ID { get; set; }
-        public int? OrderID { get; set; }
-        public string CustomerID { get; set; } = null!;
-        public DateTime? OrderDate { get; set; }
-        public double? Freight { get; set; }
-    }
-
-    public class Details
-    {
-        public int ID { get; set; }
-        public string ImageURL { get; set; } = null!;
-        public string Symbol { get; set; } = null!;
-        public string Name { get; set; } = null!;
-        public string Sector { get; set; } = null!;
-        public string Country { get; set; } = null!;
-        public string Ceo { get; set; } = null!;
+            //TODO Handle error
+            return;
+        }
+        DetailsList = watchlist;
     }
 }

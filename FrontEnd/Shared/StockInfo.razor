@@ -7,7 +7,7 @@
 @if (details != null)
 {
     <img src="@details.Results.Branding.LogoUrl"/>
-    <h4>@details.Results.Name</h4>
+    <h4>@details.Results.Name</h4><SfButton @onclick="AddToWatchlist">Add to watchlist</SfButton>
     <p>
         <span>Country: @details.Results.Locale</span>
         <span>Industry: @details.Results.SicDescription</span><br/>
@@ -36,6 +36,22 @@
     
     [Parameter]
     public string Symbol { get; set; }
+
+    public async Task AddToWatchlist()
+    {
+        if (details == null)
+        {
+            return;
+        }
+        var isSuccess = await _HttpClient.AddToWatchlist(details.Results.Ticker);
+        if (!isSuccess)
+        {
+            //Error
+            return;
+        }
+        //Success
+        return;
+    }
 
     public async Task Fetch(string symbol)
     {

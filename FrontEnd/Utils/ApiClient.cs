@@ -52,9 +52,10 @@ public partial class ApiClient : HttpClient
         return true;
     }
 
-    private async Task<HttpResponseMessage> GetWithRefreshCheck(string url, bool firstRun = true)
+    private async Task<HttpResponseMessage> SendWithRefreshCheck(HttpMethod method, string url, bool firstRun = true)
     {
-        var response = await GetAsync(url);
+        var request = new HttpRequestMessage(method, url);
+        var response = await SendAsync(request);
         if (!response.IsSuccessStatusCode && firstRun)
         {
             if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -65,10 +66,25 @@ public partial class ApiClient : HttpClient
                     return response;
                 }
                 response.Dispose();
-                return await GetWithRefreshCheck(url, false);
+                return await SendWithRefreshCheck(method, url, false);
             }
         }
         return response;
+    }
+    
+    private Task<HttpResponseMessage> GetWithRefreshCheck(string url)
+    {
+        return SendWithRefreshCheck(HttpMethod.Get, url);
+    }
+
+    private Task<HttpResponseMessage> PutWithRefreshCheck(string url)
+    {
+        return SendWithRefreshCheck(HttpMethod.Put, url);
+    }
+
+    private Task<HttpResponseMessage> PostWithRefreshCheck(string url)
+    {
+        return SendWithRefreshCheck(HttpMethod.Post, url);
     }
 
     public async Task<TickerDetailsDTO?> GetDetails(string name)
@@ -99,5 +115,38 @@ public partial class ApiClient : HttpClient
                 new SearchData(e.Ticker, e.Name, e.PrimaryExchange))
             .ToList();
         return searchAutocomplete;
+    }
+
+    public async Task<bool> AddToWatchlist(string name)
+    {
+        using var response = await PostWithRefreshCheck($"/api/Stock/watchlist/{name}");
+        if (!response.IsSuccessStatusCode)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<List<WatchlistData>?> GetWatchlist()
+    {
+        using var response = await GetWithRefreshCheck($"/api/Stock/watchlist");
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        var details = await response.Content
+            .ReadFromJsonAsync<List<TickerDetailsDTO>>();
+        return details.Select(
+            e => new WatchlistData
+            {
+                ImageURL = e.Results.Branding.LogoUrl.ToString(),
+                Symbol = e.Results.Ticker,
+                Name = e.Results.Name,
+                Marker = e.Results.Market,
+                Type = e.Results.Type,
+            }
+            ).ToList();
     }
 }

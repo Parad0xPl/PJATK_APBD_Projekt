@@ -106,9 +106,11 @@ public class AccountController : ControllerBase
         var token = headersAuthorization.Split(" ")[1];
         var jwtSecurityToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
 
-        var accountId = Convert.ToInt32(
-            jwtSecurityToken.Payload["ID"]
-            );
+        int accountId = Request.GetAccountId() ?? -1; 
+        if (accountId == -1)
+        {
+            return BadRequest();
+        }
         
         var result = await _refreshTokenService.VerifyTokenAsync(
             refreshToken,

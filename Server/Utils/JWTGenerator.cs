@@ -7,7 +7,7 @@ using Server.Entities;
 
 namespace Server.Utils;
 
-public class JWTGenerator
+public static class JWTGenerator
 {
     private static SigningCredentials? Credentials { get; set; }
     

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using Server.Entities;
 using Server.Services;
 using Shared.DTO;
+using Server.Utils;
 
 namespace Server.Controllers;
 
@@ -94,10 +95,62 @@ public class StockController : ControllerBase
         return Ok(details);
     }
 
-    [HttpPut]
+    [HttpPost]
     [Route("watchlist/{name}")]
     public async Task<IActionResult> AddToWatchlist(string name)
     {
+        
+        var stock = await _stockContext.Stocks
+            .Where(e => e.Ticker == name)
+            .SingleOrDefaultAsync();
+        if (stock == null)
+        {
+            return NotFound();
+        }
+
+        var userId = Request.GetAccountId() ?? -1;
+        if (userId == -1)
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await _stockContext
+                .Watchlist
+                .AddAsync(new ObservedStock
+                {
+                    AccountId = userId,
+                    StockId = stock.Id
+                });
+            await _stockContext.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {}
+            
         return Ok();
+    }
+
+    [HttpGet]
+    [Route("watchlist")]
+    public async Task<IActionResult> GetWatchlist()
+    {
+        var userId = Request.GetAccountId() ?? -1;
+        if (userId == -1)
+        {
+            return Unauthorized();
+        }
+
+        var list = await _stockContext
+            .Watchlist
+            .Where(e => e.AccountId == userId)
+            .Join(_stockContext.Stocks, e => e.StockId, e => e.Id, (e, s) => s)
+            .ToListAsync();
+
+        var listDto = list.Select(e =>
+        {
+            return JsonSerializer.Deserialize<TickerDetailsDTO>(e.RequestJSON);
+        }).ToList();
+        return Ok(listDto);
     }
 }

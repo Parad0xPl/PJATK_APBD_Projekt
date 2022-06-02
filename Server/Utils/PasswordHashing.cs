@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace Server.Utils;
 
-public class PasswordHashing
+public static class PasswordHashing
 {
     public static string HashPassword(string password, string salt)
     {
