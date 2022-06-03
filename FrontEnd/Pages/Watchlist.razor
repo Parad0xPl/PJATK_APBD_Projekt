@@ -5,7 +5,8 @@
 @using FrontEnd.Utils
 @inject ApiClient _httpClient
 
-<SfGrid DataSource="@DetailsList">
+<SfGrid DataSource="@DetailsList" AllowPaging="true">
+    <GridPageSettings PageCount="5" PageSize="5"></GridPageSettings>
     <GridColumns>
         <GridColumn Field="Logo"></GridColumn>
         <GridColumn Field="Symbol"></GridColumn>

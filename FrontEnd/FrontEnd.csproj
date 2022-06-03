@@ -15,6 +15,7 @@
         <PackageReference Include="Syncfusion.Blazor.Grid" Version="20.1.0.58" />
         <PackageReference Include="Syncfusion.Blazor.Inputs" Version="20.1.0.58" />
         <PackageReference Include="Syncfusion.Blazor.Layouts" Version="20.1.0.58" />
+        <PackageReference Include="Syncfusion.Blazor.StockChart" Version="20.1.0.58" />
         <PackageReference Include="Syncfusion.Blazor.Themes" Version="20.1.0.58" />
     </ItemGroup>
 

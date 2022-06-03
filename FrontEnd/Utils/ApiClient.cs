@@ -144,15 +144,22 @@ public partial class ApiClient : HttpClient
         var details = await response.Content
             .ReadFromJsonAsync<List<TickerDetailsDTO>>();
         return details.Select(
-            e => new WatchlistData
+            e =>
             {
-                ImageURL = e.Results.Branding.LogoUrl.ToString(),
-                Symbol = e.Results.Ticker,
-                Name = e.Results.Name,
-                Marker = e.Results.Market,
-                Type = e.Results.Type,
-            }
-            ).ToList();
+                string imageUrl = "";
+                if (e.Results.Branding != null)
+                {
+                    imageUrl = e.Results.Branding.LogoUrl.ToString();
+                }
+                return new WatchlistData
+                {
+                    ImageURL = imageUrl,
+                    Symbol = e.Results.Ticker,
+                    Name = e.Results.Name,
+                    Marker = e.Results.Market,
+                    Type = e.Results.Type,
+                };
+            }).ToList();
     }
 
     public async Task<bool> RemoveFromWatchlist(string name)

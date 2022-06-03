@@ -22,24 +22,26 @@
     <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Month); }">1 month ago</SfButton>
     <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Quarter); }">3 month ago</SfButton>
 
-    <SfStockChart Title="AAPL Stock Price" Theme="@theme">
-        <StockChartEvents OnLoaded="@ChartLoaded"></StockChartEvents>
-        <StockChartPrimaryXAxis>
-            <StockChartAxisMajorGridLines Width="0"></StockChartAxisMajorGridLines>
-            <StockChartAxisCrosshairTooltip Enable="true"></StockChartAxisCrosshairTooltip>
-        </StockChartPrimaryXAxis>
-        <StockChartPrimaryYAxis>
-            <StockChartAxisLineStyle Width="0"></StockChartAxisLineStyle>
-            <StockChartAxisMajorTickLines Width="0"></StockChartAxisMajorTickLines>
-        </StockChartPrimaryYAxis>
-        <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings>
-        <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings>
+    <SfStockChart Title="@Symbol" Theme="@theme">
+        @* <StockChartEvents OnLoaded="@ChartLoaded"></StockChartEvents> *@
+        @* <StockChartPrimaryXAxis> *@
+        @*     <StockChartAxisMajorGridLines Width="0"></StockChartAxisMajorGridLines> *@
+        @*     <StockChartAxisCrosshairTooltip Enable="true"></StockChartAxisCrosshairTooltip> *@
+        @* </StockChartPrimaryXAxis> *@
+        @* <StockChartPrimaryYAxis> *@
+        @*     <StockChartAxisLineStyle Width="0"></StockChartAxisLineStyle> *@
+        @*     <StockChartAxisMajorTickLines Width="0"></StockChartAxisMajorTickLines> *@
+        @* </StockChartPrimaryYAxis> *@
+        @* <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings> *@
+        @* <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings> *@
         <StockChartSeriesCollection>
-            <StockChartSeries DataSource="@StockGraphData" Type="ChartSeriesType.HiloOpenClose" XName="x"></StockChartSeries>
+            <StockChartSeries DataSource="@StockGraphData" Type="ChartSeriesType.Candle"
+                              XName="Date" High="High" Low="Low" 
+                              Open="Open" Close="Close" Volume="Volume"></StockChartSeries>
         </StockChartSeriesCollection>
-        <StockChartChartArea>
-            <StockChartChartAreaBorder Width="0"></StockChartChartAreaBorder>
-        </StockChartChartArea>
+        @* <StockChartChartArea> *@
+        @*     <StockChartChartAreaBorder Width="0"></StockChartChartAreaBorder> *@
+        @* </StockChartChartArea> *@
 
     </SfStockChart>
 }
@@ -77,11 +79,7 @@
         //Success
         return;
     }
-
-    void ChartLoaded()
-    {
-        StateHasChanged();
-    }
+    
     Theme theme = Theme.Bootstrap5;
     public async Task Fetch(string symbol)
     {
@@ -108,6 +106,7 @@
             return;
         }
         StockGraphData = graphDatas;
+        StateHasChanged();
     }
     
     protected override async Task OnInitializedAsync()
@@ -115,4 +114,10 @@
         await Fetch(Symbol);
         await base.OnInitializedAsync();
     }
+
+    private void ChartLoaded(StockChartEventArgs obj)
+    {
+        StateHasChanged();
+    }
+
 }
