@@ -8,7 +8,7 @@
 @inject ApiClient _HttpClient
 
 <div>Company symbol</div>
-<SfAutoComplete TValue="string" TItem="SearchData" Placeholder="e.g. Basketball" DataSource="@SearchItems">
+<SfAutoComplete TValue="string" TItem="SearchData" Placeholder="Type symbol" DataSource="@SearchItems" @bind-Value="@CurrentTicker">
     <AutoCompleteFieldSettings Value="Ticker"/>
     <AutoCompleteTemplates TItem="SearchData">
         <ItemTemplate>
@@ -24,9 +24,26 @@
     <SfButton>Watchlist</SfButton>
 </NavLink>
 <div>Graph</div>
-<StockInfo Symbol="TSLA"></StockInfo>
+@if(CurrentTicker.Length > 2){
+    <StockInfo Symbol="@CurrentTicker"></StockInfo>
+}
 
 @code {
+
+    private string _CurrentTicker = "";
+    private string CurrentTicker
+    {
+        get => _CurrentTicker;
+        set
+        {
+            if (value.Length > 2)
+            {
+                StateHasChanged();
+            }
+            _CurrentTicker = value;
+        }
+    }
+
     public async Task<IEnumerable<SearchData>> GetSearch(string value)
     {
         var search = await _httpClient.GetSearch(value);
@@ -41,5 +58,5 @@
 
     public IEnumerable<SearchData> SearchItems { get; set; }
 
-
+    
 }

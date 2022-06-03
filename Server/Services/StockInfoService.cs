@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Net.Http.Headers;
 using Shared.DTO;
 
@@ -43,7 +44,29 @@ public class StockInfoService : IStockInfoService
         var response = await _httpClient.GetAsync(TickerEndpoint + "/" + name);
         var messageStream = await response.Content.ReadAsStreamAsync();
         var ticker = await JsonSerializer.DeserializeAsync<TickerDetailsDTO>(messageStream);
+        if (ticker != null && ticker.Results != null && ticker.Results.Branding != null)
+        {
+            if (ticker.Results.Branding.IconUrl != null)
+            {
+                ticker.Results.Branding.IconUrl = ChangeToProxy(ticker.Results.Branding.IconUrl);
+            }
+
+            if (ticker.Results.Branding.LogoUrl != null)
+            {
+                ticker.Results.Branding.LogoUrl = ChangeToProxy(ticker.Results.Branding.LogoUrl);
+            }
+        }
         return ticker;
+    }
+
+    private Uri ChangeToProxy(Uri brandingIconUrl)
+    {
+        var builder = new UriBuilder(brandingIconUrl);
+        builder.Scheme = "http";
+        builder.Host = "localhost";
+        builder.Port = 5290;
+        builder.Path = "/api/stock/image"+builder.Path.Substring(13);
+        return builder.Uri;
     }
 
     public async Task<AggregatesDTO?> GetGraphData(string name, string timespan, DateOnly from, DateOnly to)

@@ -149,4 +149,71 @@ public partial class ApiClient : HttpClient
             }
             ).ToList();
     }
+
+    public async Task<List<GraphData>?> GetGraph(string name, PossibleGraphs type)
+    {
+        string timespan;
+        string from;
+        string to;
+        var pointInTime = DateTime.Now.AddMonths(-1);
+        switch (type)
+        {
+            default:
+            case PossibleGraphs.Today:
+                timespan = "day";
+                to = pointInTime.ToString("yyyy-MM-dd");
+                from = pointInTime.AddDays(-1).ToString("yyyy-MM-dd");
+                break;
+            case PossibleGraphs.Week:
+                timespan = "day";
+                to = pointInTime.ToString("yyyy-MM-dd");
+                from = pointInTime.AddDays(-7).ToString("yyyy-MM-dd");
+                break;
+            case PossibleGraphs.Month:
+                timespan = "day";
+                to = pointInTime.ToString("yyyy-MM-dd");
+                from = pointInTime.AddMonths(-1).ToString("yyyy-MM-dd");
+                break;
+            case PossibleGraphs.Quarter:
+                timespan = "week";
+                to = pointInTime.ToString("yyyy-MM-dd");
+                from = pointInTime.AddMonths(-3).ToString("yyyy-MM-dd");
+                break;
+        }
+        
+        using var response = await GetWithRefreshCheck($"/api/Stock/{name}/graph/{timespan}/{from}/{to}");
+        if (!response.IsSuccessStatusCode)
+        {
+            //TODO Handle error
+            return null;
+        }
+
+        var aggregated = await response.Content.ReadFromJsonAsync<AggregatesDTO>();
+        if (aggregated.Results == null)
+        {
+            return null;
+        }
+        
+        var result = aggregated.Results.Select(
+            e => new GraphData
+            {
+                x = DateTime.UnixEpoch.AddMilliseconds(e.T),
+                close = e.C,
+                high = e.H,
+                low = e.L,
+                open = e.O,
+                volume = e.V
+            }).ToList();
+        return result;
+    } 
+}
+
+public class GraphData
+{        
+    public DateTime x { get; set; }
+    public double open { get; set; }
+    public double low { get; set; }
+    public double close { get; set; }
+    public double high { get; set; }
+    public double volume { get; set; }
 }

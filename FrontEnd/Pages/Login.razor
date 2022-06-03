@@ -13,9 +13,11 @@
     </div>
 }
 
-<SfTextBox Placeholder="Login" @bind-Value="UserLogin"></SfTextBox><br>
-<SfTextBox Placeholder="Password" Type="InputType.Password" @bind-Value="UserPassword"></SfTextBox><br>
-<SfButton @onclick="PostLogin">Login</SfButton><SfButton>Register</SfButton>
+<form @onsubmit="PostLogin">
+    <SfTextBox Placeholder="Login" @bind-Value="UserLogin"></SfTextBox><br>
+    <SfTextBox Placeholder="Password" Type="InputType.Password" @bind-Value="UserPassword"></SfTextBox><br>
+    <SfButton @onclick="PostLogin">Login</SfButton><SfButton>Register</SfButton>
+</form>
  
     <style>
     .e-panel-header {
