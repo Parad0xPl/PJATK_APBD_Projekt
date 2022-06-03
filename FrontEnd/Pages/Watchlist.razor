@@ -5,6 +5,8 @@
 @using FrontEnd.Utils
 @inject ApiClient _httpClient
 
+<PageTitle>Watchlist</PageTitle>
+
 <SfGrid DataSource="@DetailsList" AllowPaging="true">
     <GridPageSettings PageCount="5" PageSize="5"></GridPageSettings>
     <GridColumns>

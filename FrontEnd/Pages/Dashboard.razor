@@ -1,15 +1,18 @@
-﻿@page "/dashboard"
+﻿@page "/"
 @inject ApiClient _httpClient
-@using Syncfusion.Blazor.Layouts
+@using Syncfusion.Blazor.Data
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Buttons
 @using FrontEnd.Utils
 @inject ApiClient _HttpClient
 
+<PageTitle>Dashboard</PageTitle>
+
 <h3>Dashboard</h3>
 <div class="row">
     <div class="col-9">
-        <SfAutoComplete TValue="string" TItem="SearchData" Placeholder="Type symbol" DataSource="@SearchItems" @bind-Value="@CurrentTicker">
+        <SfAutoComplete TValue="string" TItem="SearchData" Placeholder="Type symbol" @bind-Value="@CurrentTicker">
+            <SfDataManager  AdaptorInstance="@typeof(AutocompleteAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
             <AutoCompleteFieldSettings Value="Ticker"/>
             <AutoCompleteTemplates TItem="SearchData">
                 <ItemTemplate>
@@ -37,34 +40,38 @@
 </style>
 
 @code {
-
-    private string _CurrentTicker = "";
-    private string CurrentTicker
-    {
-        get => _CurrentTicker;
-        set
-        {
-            if (value.Length > 2)
-            {
-                StateHasChanged();
-            }
-            _CurrentTicker = value;
-        }
-    }
-
-    public async Task<IEnumerable<SearchData>> GetSearch(string value)
-    {
-        var search = await _httpClient.GetSearch(value);
-        return search ?? new SearchData[]{};
-    }
+    private static ApiClient? _apiClient = null;
+    private string CurrentTicker = "";
 
     protected override async Task OnInitializedAsync()
     {
-        SearchItems = await GetSearch("TL");
+        _apiClient = _httpClient;
         await base.OnInitializedAsync();
     }
 
-    public IEnumerable<SearchData> SearchItems { get; set; }
-
+    class AutocompleteAdaptor : DataAdaptor
+    {
+        public override async Task<object> ReadAsync(DataManagerRequest dataManagerRequest, string key = null)
+        {
+            ApiClient client = _apiClient;
+            string? filter = null;
+            if (dataManagerRequest.Where != null)
+            {
+                foreach (var v in dataManagerRequest.Where)
+                {
+                    if (v.Operator == "contains")
+                    {
+                        filter = v.value as string;
+                    }
+                }
+            }
+            if (filter != null && filter.Length >= 2)
+            {
+                var searchDatas = await client.GetSearch(filter);
+                return searchDatas ?? new List<SearchData>{};
+            }
+            return new List<SearchData>{};
+        }
+    }
     
 }

@@ -42,8 +42,8 @@
     </div>
 
     <div class="row">
-        <SfStockChart Title="@Symbol" Theme="@theme">
-            @* <StockChartEvents OnLoaded="@ChartLoaded"></StockChartEvents> *@
+        <SfStockChart @ref="@Chart" Title="@Symbol" Theme="@theme" EnableSelector="false">
+            <StockChartEvents OnLoaded="@ChartLoaded"></StockChartEvents>
             @* <StockChartPrimaryXAxis> *@
             @*     <StockChartAxisMajorGridLines Width="0"></StockChartAxisMajorGridLines> *@
             @*     <StockChartAxisCrosshairTooltip Enable="true"></StockChartAxisCrosshairTooltip> *@
@@ -52,8 +52,8 @@
             @*     <StockChartAxisLineStyle Width="0"></StockChartAxisLineStyle> *@
             @*     <StockChartAxisMajorTickLines Width="0"></StockChartAxisMajorTickLines> *@
             @* </StockChartPrimaryYAxis> *@
-            @* <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings> *@
-            @* <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings> *@
+            <StockChartTooltipSettings Enable="false"></StockChartTooltipSettings>
+            <StockChartCrosshairSettings Enable="false"></StockChartCrosshairSettings>
             <StockChartSeriesCollection>
                 <StockChartSeries DataSource="@StockGraphData" Type="ChartSeriesType.Candle"
                                   XName="x" High="high" Low="low" 
@@ -90,8 +90,8 @@
 @inject ApiClient _HttpClient
 @code {
     private TickerDetailsDTO? details { get; set; }
-    
     private List<GraphData> StockGraphData { get; set; }
+    private SfStockChart Chart { get; set; }
     
     [Parameter]
     public string Symbol { get; set; }
@@ -135,7 +135,7 @@
             return;
         }
         StockGraphData = graphDatas;
-        StateHasChanged();
+        Chart.Refresh();
     }
 
     public async Task UpdateGraph(PossibleGraphs symbol)
@@ -157,7 +157,6 @@
 
     private void ChartLoaded(StockChartEventArgs obj)
     {
-        StateHasChanged();
     }
 
 }
