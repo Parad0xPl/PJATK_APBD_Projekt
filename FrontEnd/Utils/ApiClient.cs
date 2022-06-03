@@ -82,6 +82,11 @@ public partial class ApiClient : HttpClient
         return SendWithRefreshCheck(HttpMethod.Put, url);
     }
 
+    private Task<HttpResponseMessage> DeleteWithRefreshCheck(string url)
+    {
+        return SendWithRefreshCheck(HttpMethod.Delete, url);
+    }
+    
     private Task<HttpResponseMessage> PostWithRefreshCheck(string url)
     {
         return SendWithRefreshCheck(HttpMethod.Post, url);
@@ -148,6 +153,17 @@ public partial class ApiClient : HttpClient
                 Type = e.Results.Type,
             }
             ).ToList();
+    }
+
+    public async Task<bool> RemoveFromWatchlist(string name)
+    {
+        using var response = await DeleteWithRefreshCheck($"/api/Stock/watchlist/{name}");
+        if (!response.IsSuccessStatusCode)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public async Task<List<GraphData>?> GetGraph(string name, PossibleGraphs type)

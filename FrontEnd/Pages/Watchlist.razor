@@ -1,20 +1,44 @@
 ﻿@page "/watchlist"
 <h3>Watchlist</h3>
 @using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
 @using FrontEnd.Utils
 @inject ApiClient _httpClient
 
 <SfGrid DataSource="@DetailsList">
     <GridColumns>
-        @foreach (var prop in typeof(WatchlistData).GetProperties())
-        {
-            @if (@prop.Name != "ID")
-            {
-                <GridColumn Field="@prop.Name" IsPrimaryKey="@(prop.Name == "OrderID")" AllowEditing="@prop.CanWrite"></GridColumn>
-            }
-        }
+        <GridColumn Field="Logo"></GridColumn>
+        <GridColumn Field="Symbol"></GridColumn>
+        <GridColumn Field="Name"></GridColumn>
+        <GridColumn Field="Type"></GridColumn>
+        <GridColumn Field="Marker"></GridColumn>
         <GridColumn Field="Options"></GridColumn>
     </GridColumns>
+    <GridTemplates>
+        <RowTemplate>
+            @{
+                var WatchlistElement = (context as WatchlistData);
+            }
+            <td>
+                <img src="@WatchlistElement.ImageURL"/>
+            </td>
+            <td>
+                @WatchlistElement.Symbol
+            </td>
+            <td>
+                @WatchlistElement.Name
+            </td>
+            <td>
+                @WatchlistElement.Type
+            </td>
+            <td>
+                @WatchlistElement.Marker
+            </td>
+            <td>
+                <SfButton @onclick="() => RemoveWatchlist(WatchlistElement.Symbol)">Remove</SfButton>
+            </td>
+        </RowTemplate>
+    </GridTemplates>
 </SfGrid>
 
 @code {
@@ -30,4 +54,14 @@
         }
         DetailsList = watchlist;
     }
+
+    private async Task RemoveWatchlist(string watchlistElementName)
+    {
+        var removeFromWatchlist = await _httpClient.RemoveFromWatchlist(watchlistElementName);
+        if (removeFromWatchlist)
+        {
+            DetailsList = DetailsList.Where(e => e.Symbol != watchlistElementName).ToList();
+        }
+    }
+
 }

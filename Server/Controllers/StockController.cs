@@ -136,6 +136,39 @@ public class StockController : ControllerBase
         return Ok();
     }
 
+    [HttpDelete]
+    [Route("watchlist/{name}")]
+    public async Task<IActionResult> RemoveToWatchlist(string name)
+    {
+        var userId = Request.GetAccountId() ?? -1;
+        if (userId == -1)
+        {
+            return Unauthorized();
+        }
+
+        var stock = await _stockContext
+            .Stocks
+            .Where(e => e.Ticker == name)
+            .SingleOrDefaultAsync();
+
+        if (stock == null)
+        {
+            return NotFound();
+        }
+
+        var watchlistRow = await _stockContext
+            .Watchlist
+            .Where(e => e.AccountId == userId && e.StockId == stock.Id)
+            .SingleOrDefaultAsync();
+        if (watchlistRow == null)
+        {
+            return NotFound();
+        }
+        _stockContext.Watchlist.Remove(watchlistRow);
+        await _stockContext.SaveChangesAsync();
+        return Ok();
+    }
+
     [HttpGet]
     [Route("watchlist")]
     public async Task<IActionResult> GetWatchlist()
