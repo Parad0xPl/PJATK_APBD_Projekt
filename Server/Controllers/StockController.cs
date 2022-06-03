@@ -194,12 +194,41 @@ public class StockController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    [Route("image/{*.}")]
+    [Route("image/{*url}")]
     public async Task<IActionResult> ProxyImage(string url)
     {
-        var image = Convert.FromBase64String(
-            "iVBORw0KGgoAAAANSUhEUgAAAJYAAACWBAMAAADOL2zRAAAAG1BMVEXMzMyWlpaqqqq3t7fFxcW+vr6xsbGjo6OcnJyLKnDGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABAElEQVRoge3SMW+DMBiE4YsxJqMJtHOTITPeOsLQnaodGImEUMZEkZhRUqn92f0MaTubtfeMh/QGHANEREREREREREREtIJJ0xbH299kp8l8FaGtLdTQ19HjofxZlJ0m1+eBKZcikd9PWtXC5DoDotRO04B9YOvFIXmXLy2jEbiqE6Df7DTleA5socLqvEFVxtJyrpZFWz/pHM2CVte0lS8g2eDe6prOyqPglhzROL+Xye4tmT4WvRcQ2/m81p+/rdguOi8Hc5L/8Qk4vhZzy08DduGt9eVQyP2qoTM1zi0/uf4hvBWf5c77e69Gf798y08L7j0RERERERERERH9P99ZpSVRivB/rgAAAABJRU5ErkJggg==");
+        var images = await _stockContext
+            .Cached
+            .Where(e => e.Url == url)
+            .SingleOrDefaultAsync();
+        if (images != null)
+        {
+            return new FileContentResult(images.Data, images.Type);
+        }
+
+        var image = await _stockInfoService.GetImage(url);
+        // var image = Convert.FromBase64String(
+        //     "iVBORw0KGgoAAAANSUhEUgAAAJYAAACWBAMAAADOL2zRAAAAG1BMVEXMzMyWlpaqqqq3t7fFxcW+vr6xsbGjo6OcnJyLKnDGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABAElEQVRoge3SMW+DMBiE4YsxJqMJtHOTITPeOsLQnaodGImEUMZEkZhRUqn92f0MaTubtfeMh/QGHANEREREREREREREtIJJ0xbH299kp8l8FaGtLdTQ19HjofxZlJ0m1+eBKZcikd9PWtXC5DoDotRO04B9YOvFIXmXLy2jEbiqE6Df7DTleA5socLqvEFVxtJyrpZFWz/pHM2CVte0lS8g2eDe6prOyqPglhzROL+Xye4tmT4WvRcQ2/m81p+/rdguOi8Hc5L/8Qk4vhZzy08DduGt9eVQyP2qoTM1zi0/uf4hvBWf5c77e69Gf798y08L7j0RERERERERERH9P99ZpSVRivB/rgAAAABJRU5ErkJggg==");
         // await Response.Body.WriteAsync(image);
-        return new FileContentResult(image, "image/png");
+        if (image == null)
+        {
+            return NotFound();
+        }
+
+        var imageData = image.Item2;
+        var imageType = image.Item1 ?? "image/png";
+
+        await _stockContext
+            .Cached
+            .AddAsync(new CachedImage
+            {
+                Url = url,
+                Type = imageType,
+                Data = imageData,
+                CreationDate = DateTime.Now
+            });
+        await _stockContext.SaveChangesAsync();
+        
+        return new FileContentResult(imageData, imageType);
     }
 }

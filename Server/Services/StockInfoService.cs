@@ -1,6 +1,9 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
+using Server.Entities;
 using Shared.DTO;
 
 namespace Server.Services;
@@ -13,6 +16,7 @@ public class StockInfoService : IStockInfoService
     private const string TickerEndpoint = "/v3/reference/tickers";
     private const string SearchEndpoint = "/v3/reference/tickers?limit=10&search=";
     private const string AggregateEndpoint = "/v2/aggs/ticker/{3}/range/1/{0}/{1}/{2}";
+    private const string ImageEndpoint = "/v1/reference";
 
     private string GetAggregateEndpoint(string timespan, DateOnly from, DateOnly to, string name)
     {
@@ -85,5 +89,23 @@ public class StockInfoService : IStockInfoService
         var messageString = await response.Content.ReadAsStreamAsync();
         var ticker = await JsonSerializer.DeserializeAsync<TickerSearchDTO>(messageString);
         return ticker;
+    }
+
+    public async Task<Tuple<string?, byte[]>?> GetImage(string url)
+    {
+        var response = await _httpClient.GetAsync(ImageEndpoint + "/" + url);
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+        
+        string? contentType = null;
+
+        if (response.Content.Headers.ContentType != null)
+        {
+            contentType = response.Content.Headers.ContentType.ToString();
+        }
+        var messageString = await response.Content.ReadAsByteArrayAsync();
+        return new Tuple<string?, byte[]>(contentType, messageString);
     }
 }

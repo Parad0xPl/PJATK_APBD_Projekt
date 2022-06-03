@@ -50,6 +50,29 @@ namespace Server.Migrations
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("Server.Entities.CachedImage", b =>
+                {
+                    b.Property<string>("Url")
+                        .HasMaxLength(320)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasMaxLength(4194304)
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Url");
+
+                    b.ToTable("Cached");
+                });
+
             modelBuilder.Entity("Server.Entities.ObservedStock", b =>
                 {
                     b.Property<int>("AccountId")
