@@ -4,49 +4,88 @@
 @using global::Shared.DTO
 @using FrontEnd.Utils
 
-
+<div class="stock-info row">
+    
 @if (details != null)
 {
-    <img src="@details.Results.Branding.LogoUrl"/>
-    <h4>@details.Results.Name</h4>
-    <SfButton @onclick="AddToWatchlist">Add to watchlist</SfButton>
-    <p>
-        <span>Country: @details.Results.Locale</span>
-        <span>Industry: @details.Results.SicDescription</span><br/>
-        <span>Currency: @details.Results.CurrencyName</span>
-        <span>Description: @details.Results.Description</span>
-    </p>
+    <div class="row">
+        <div class="col-2">
+            <img style="max-height: 100%;max-width: 100%;" src="@details.Results.Branding.LogoUrl"/>
+        </div>
+        <div class="col-7">
+            <h4>@details.Results.Name</h4>
+        </div>
+        <div class="col-3">
+            <SfButton @onclick="AddToWatchlist">Add to watchlist</SfButton>
+        </div>
+    </div>
+    <div class="row stock-description">
+        <div class="col-12">
+            <span class="stock-description-info">Country:</span> @details.Results.Locale.ToUpper()
+        </div>
+        <div class="col-12">
+            <span class="stock-description-info">Industry:</span> @details.Results.SicDescription.ToLower()
+        </div>
+        <div class="col-12">
+            <span class="stock-description-info">Currency:</span> @details.Results.CurrencyName.ToUpper()
+        </div>
+        <div class="col-12">
+            <span class="stock-description-info">Description:</span> @details.Results.Description
+        </div>
+    </div>
 
-    <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Today); }">Current Day</SfButton>
-    <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Week); }">1 week ago</SfButton>
-    <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Month); }">1 month ago</SfButton>
-    <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Quarter); }">3 month ago</SfButton>
+    <div>
+        <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Today); }">Current Day</SfButton>
+        <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Week); }">1 week ago</SfButton>
+        <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Month); }">1 month ago</SfButton>
+        <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Quarter); }">3 month ago</SfButton>
+    </div>
 
-    <SfStockChart Title="@Symbol" Theme="@theme">
-        @* <StockChartEvents OnLoaded="@ChartLoaded"></StockChartEvents> *@
-        @* <StockChartPrimaryXAxis> *@
-        @*     <StockChartAxisMajorGridLines Width="0"></StockChartAxisMajorGridLines> *@
-        @*     <StockChartAxisCrosshairTooltip Enable="true"></StockChartAxisCrosshairTooltip> *@
-        @* </StockChartPrimaryXAxis> *@
-        @* <StockChartPrimaryYAxis> *@
-        @*     <StockChartAxisLineStyle Width="0"></StockChartAxisLineStyle> *@
-        @*     <StockChartAxisMajorTickLines Width="0"></StockChartAxisMajorTickLines> *@
-        @* </StockChartPrimaryYAxis> *@
-        @* <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings> *@
-        @* <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings> *@
-        <StockChartSeriesCollection>
-            <StockChartSeries DataSource="@StockGraphData" Type="ChartSeriesType.Candle"
-                              XName="x" High="high" Low="low" 
-                              Open="open" Close="close" Volume="volume"></StockChartSeries>
-        </StockChartSeriesCollection>
-        @* <StockChartChartArea> *@
-        @*     <StockChartChartAreaBorder Width="0"></StockChartChartAreaBorder> *@
-        @* </StockChartChartArea> *@
+    <div class="row">
+        <SfStockChart Title="@Symbol" Theme="@theme">
+            @* <StockChartEvents OnLoaded="@ChartLoaded"></StockChartEvents> *@
+            @* <StockChartPrimaryXAxis> *@
+            @*     <StockChartAxisMajorGridLines Width="0"></StockChartAxisMajorGridLines> *@
+            @*     <StockChartAxisCrosshairTooltip Enable="true"></StockChartAxisCrosshairTooltip> *@
+            @* </StockChartPrimaryXAxis> *@
+            @* <StockChartPrimaryYAxis> *@
+            @*     <StockChartAxisLineStyle Width="0"></StockChartAxisLineStyle> *@
+            @*     <StockChartAxisMajorTickLines Width="0"></StockChartAxisMajorTickLines> *@
+            @* </StockChartPrimaryYAxis> *@
+            @* <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings> *@
+            @* <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings> *@
+            <StockChartSeriesCollection>
+                <StockChartSeries DataSource="@StockGraphData" Type="ChartSeriesType.Candle"
+                                  XName="x" High="high" Low="low" 
+                                  Open="open" Close="close" Volume="volume"></StockChartSeries>
+            </StockChartSeriesCollection>
+            @* <StockChartChartArea> *@
+            @*     <StockChartChartAreaBorder Width="0"></StockChartChartAreaBorder> *@
+            @* </StockChartChartArea> *@
 
-    </SfStockChart>
+        </SfStockChart>
+    </div>
 }
 
+</div>
 
+<style>
+    .stock-info {
+        padding-top: 20px;
+    }
+    
+    .stock-info > * {
+        margin-top: 20px;
+    }
+    
+    .stock-description .stock-description-info {
+        font-weight: bold;
+    }
+    
+    .stock-description-info > * {
+        margin-bottom: 10px;
+    }
+</style>
 
 @inject ApiClient _HttpClient
 @code {
@@ -88,13 +127,14 @@
         {
             return;
         }
+        details = response;
+        StateHasChanged();
         var graphDatas = await _HttpClient.GetGraph(symbol, PossibleGraphs.Today);
         if (graphDatas == null)
         {
             return;
         }
         StockGraphData = graphDatas;
-        details = response;
         StateHasChanged();
     }
 

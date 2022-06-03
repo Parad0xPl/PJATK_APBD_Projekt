@@ -1,32 +1,40 @@
 ﻿@page "/dashboard"
 @inject ApiClient _httpClient
-<h3>Dashboard</h3>
 @using Syncfusion.Blazor.Layouts
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Buttons
 @using FrontEnd.Utils
 @inject ApiClient _HttpClient
 
-<div>Company symbol</div>
-<SfAutoComplete TValue="string" TItem="SearchData" Placeholder="Type symbol" DataSource="@SearchItems" @bind-Value="@CurrentTicker">
-    <AutoCompleteFieldSettings Value="Ticker"/>
-    <AutoCompleteTemplates TItem="SearchData">
-        <ItemTemplate>
-            <div>
-                <span class="ticker">@((context as SearchData).Ticker)</span>
-                <span class="name">@((context as SearchData).Name)</span>
-                <span class="exchange">@((context as SearchData).PrimaryExchange)</span>
-            </div>
-        </ItemTemplate>
-    </AutoCompleteTemplates>
-</SfAutoComplete>
-<NavLink href="watchlist">
-    <SfButton>Watchlist</SfButton>
-</NavLink>
-<div>Graph</div>
+<h3>Dashboard</h3>
+<div class="row">
+    <div class="col-9">
+        <SfAutoComplete TValue="string" TItem="SearchData" Placeholder="Type symbol" DataSource="@SearchItems" @bind-Value="@CurrentTicker">
+            <AutoCompleteFieldSettings Value="Ticker"/>
+            <AutoCompleteTemplates TItem="SearchData">
+                <ItemTemplate>
+                    <div>
+                        <span class="ticker">@((context as SearchData).Ticker)</span>
+                        <span class="name">@((context as SearchData).Name)</span>
+                        <span class="exchange">@((context as SearchData).PrimaryExchange)</span>
+                    </div>
+                </ItemTemplate>
+            </AutoCompleteTemplates>
+        </SfAutoComplete>
+    </div>
+    <div class="col-3">
+        <NavLink href="watchlist">
+            <SfButton>Watchlist</SfButton>
+        </NavLink>
+    </div>
+</div>
 @if(CurrentTicker.Length > 2){
     <StockInfo Symbol="@CurrentTicker"></StockInfo>
 }
+
+<style>
+    
+</style>
 
 @code {
 
