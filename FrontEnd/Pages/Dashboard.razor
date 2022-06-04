@@ -1,5 +1,6 @@
 ﻿@page "/{urlTicker?}"
 @inject ApiClient HttpClient
+@inject NavigationManager Navigation
 @using Syncfusion.Blazor.Data
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Buttons
@@ -76,6 +77,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         _apiClient = HttpClient;
+        if (!_apiClient.IsLogin)
+        {
+            Navigation.NavigateTo("/login");
+        }
         await base.OnInitializedAsync();
     }
 
