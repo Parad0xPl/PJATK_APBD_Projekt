@@ -92,12 +92,65 @@ public class StockController : ControllerBase
     [Route("search/{name}")]
     public async Task<IActionResult> SearchStock(string name)
     {
-        var details = await _stockInfoService.Search(name);
+        var code = name.Substring(0, 2);
+        if (code.Length < 2)
+        {
+            return BadRequest();
+        }
+
+        var cachedResult = await _stockContext
+            .CachedSearches
+            .Where(e => e.Code == code)
+            .SingleOrDefaultAsync();
+        if (cachedResult != null && 
+            cachedResult.UpdateTime.AddDays(1).CompareTo(DateTime.Now) >= 0)
+        {
+            var result = JsonSerializer.Deserialize<TickerSearchDTO>(cachedResult.Message);
+            return Ok(FilterSearch(result, name));
+        }
+        
+        var details = await _stockInfoService.Search(code);
         if (details == null)
         {
             return NotFound();
         }
-        return Ok(details);
+
+        var message = JsonSerializer.Serialize(details);
+        if (cachedResult != null)
+        {
+            cachedResult.Message = message;
+            cachedResult.UpdateTime = DateTime.Now;
+        }
+        else
+        {
+            await _stockContext
+                .CachedSearches
+                .AddAsync(
+                    new CachedSearch
+                    {
+                        Code = code,
+                        Message = message,
+                        UpdateTime = DateTime.Now
+                    }
+                );
+        }
+
+        await _stockContext.SaveChangesAsync();
+        
+        return Ok(FilterSearch(details, name));
+    }
+
+    private TickerSearchDTO? FilterSearch(TickerSearchDTO? result, string name)
+    {
+        if (result == null)
+        {
+            return null;
+        }
+        result.Results = result
+            .Results
+            .Where(e => e.Ticker.StartsWith(name))
+            .ToList();
+        return result;
     }
 
     [HttpPost]

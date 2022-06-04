@@ -14,7 +14,7 @@ public class StockInfoService : IStockInfoService
     private readonly string _apiKey;
     private const string ApiUrl = "https://api.polygon.io";
     private const string TickerEndpoint = "/v3/reference/tickers";
-    private const string SearchEndpoint = "/v3/reference/tickers?limit=10&search=";
+    private const string SearchEndpoint = "/v3/reference/tickers?limit=1000&search=";
     private const string AggregateEndpoint = "/v2/aggs/ticker/{3}/range/1/{0}/{1}/{2}";
     private const string ImageEndpoint = "/v1/reference";
 
@@ -84,8 +84,6 @@ public class StockInfoService : IStockInfoService
     public async Task<TickerSearchDTO?> Search(string phrase)
     {
         var response = await _httpClient.GetAsync(SearchEndpoint + phrase);
-        // var message = await response.Content.ReadAsStringAsync();
-        // var ticker = JsonSerializer.Deserialize<TickerSearchDTO>(message);
         var messageString = await response.Content.ReadAsStreamAsync();
         var ticker = await JsonSerializer.DeserializeAsync<TickerSearchDTO>(messageString);
         return ticker;

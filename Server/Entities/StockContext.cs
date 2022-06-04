@@ -10,6 +10,7 @@ public class StockContext : DbContext
     public virtual DbSet<Stock> Stocks {get;set;}
     public virtual DbSet<RefreshToken> RefreshTokens {get;set;}
     public virtual DbSet<CachedImage> Cached { get; set; }
+    public virtual DbSet<CachedSearch> CachedSearches { get; set; }
 
     public StockContext(DbContextOptions options) : base(options)
     {

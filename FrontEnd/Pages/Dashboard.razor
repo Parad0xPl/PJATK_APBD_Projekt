@@ -31,7 +31,7 @@
         </NavLink>
     </div>
 </div>
-@if(CurrentTicker.Length > 2){
+@if(CurrentTicker != null && CurrentTicker.Length > 1){
     <StockInfo Symbol="@CurrentTicker"></StockInfo>
 }
 
@@ -41,7 +41,7 @@
 
 @code {
     private static ApiClient? _apiClient = null;
-    private string CurrentTicker = "";
+    private string? CurrentTicker = null;
 
     protected override async Task OnInitializedAsync()
     {
