@@ -6,6 +6,7 @@
 @using FrontEnd.Utils
 @using System.Net
 @inject NavigationManager Nav
+@inject ApiClient HttpClient
 
 @if(ErrorMessage != null){
     <div class="alert alert-danger" role="alert">
@@ -25,7 +26,6 @@
     }
     </style>
 
-@inject ApiClient HttpClient
 @code {
     private string? UserLogin { get; set; }
     private string? UserPassword { get; set; }
@@ -35,6 +35,11 @@
     private async Task PostLogin()
     {
         ErrorMessage = null;
+        
+        if (!ValidateForm())
+        {
+            return;
+        }
         
         var loginData = new LoginDataDTO
         {
@@ -68,6 +73,23 @@
 
         Nav.NavigateTo("/");
         
+    }
+
+    private bool ValidateForm()
+    {
+        if (UserLogin == null || UserPassword == null)
+        {
+            ErrorMessage = "You need to pass login and password!";
+            return false;
+        }
+
+        if (UserLogin.Length > 64)
+        {
+            ErrorMessage = "Login too long!";
+            return false;
+        }
+
+        return true;
     }
 
     private void GoToRegister()

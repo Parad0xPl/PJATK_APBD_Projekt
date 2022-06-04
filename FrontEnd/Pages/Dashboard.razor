@@ -17,6 +17,7 @@
                 <ItemTemplate>
                     <div>
                         <span class="ticker">@context.Ticker</span>
+                        <span> - </span>
                         <span class="name">@context.Name</span>
                         <span class="exchange">@context.PrimaryExchange</span>
                     </div>
@@ -33,9 +34,28 @@
 @if(_currentTicker is {Length: > 1 }){
     <StockInfo Symbol="@_currentTicker"></StockInfo>
 }
+else
+{
+    <span class="choose-title">Choose company</span>
+}
 
 <style>
+    .row .exchange {
+        float: right;
+    }
     
+    .choose-title {
+        font-size: 3em;
+        width: 100%;
+        margin-top: 1.5em;
+        text-align: center;
+        overflow: hidden;
+        display: block;
+    }
+    
+    .row .complete-left {
+        width: 70%;
+    }
 </style>
 
 @code {

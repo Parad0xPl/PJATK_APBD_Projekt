@@ -2,7 +2,17 @@
 <h3>Register</h3>
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Buttons
+@using global::Shared.DTO
+@using System.Net
+@using FrontEnd.Utils
 @inject NavigationManager Nav
+@inject ApiClient HttpClient
+
+@if(ErrorMessage != null){
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
 
 <form @onsubmit="PostRegister">
     <SfTextBox Placeholder="Login" @bind-Value="Login"></SfTextBox><br>
@@ -23,14 +33,76 @@
     private string? PasswordRepeat { get; set; }
     private string? Email { get; set; }
     
+    private string? ErrorMessage { get; set; }
+    
     private void GoToLogin()
     {
         Nav.NavigateTo("/login");
     }
 
-    private void PostRegister()
+    private async Task PostRegister()
     {
+        ErrorMessage = null;
         
+        if (!ValidateForm())
+        {
+            return;
+        }
+        
+        var registerData = new RegisterDataDTO()
+        {
+            Login = Login,
+            Password = Password
+        };
+        var result = await HttpClient.PostAsJsonAsync("/api/register", registerData);
+
+
+        if (!result.IsSuccessStatusCode)
+        {
+            if (result.StatusCode == HttpStatusCode.InternalServerError)
+            {
+                ErrorMessage = await result.Content.ReadAsStringAsync();
+            }
+            if (ErrorMessage == null || ErrorMessage.Trim().Length == 0)
+            {
+                ErrorMessage = result.ReasonPhrase;
+            }
+            Console.WriteLine(result.Content.ToString());
+            Console.WriteLine();
+            return;
+        }
+
+        GoToLogin();
+    }
+
+    private bool ValidateForm()
+    {
+        if (Login == null || Password == null || PasswordRepeat == null || Email == null)
+        {
+            ErrorMessage = "You need to pass login and password!";
+            return false;
+        }
+
+        if (!(5 <= Login.Length && Login.Length <= 64))
+        {
+            ErrorMessage = "Incorrect login!";
+            return false;
+        }
+        
+        
+        if (!(5 <= Login.Length && Login.Length <= 64))
+        {
+            ErrorMessage = "Incorrect password!";
+            return false;
+        }
+
+        if (Password != PasswordRepeat)
+        {
+            ErrorMessage = "Passwords don't match!";
+            return false;
+        }
+
+        return true;
     }
 
 }
