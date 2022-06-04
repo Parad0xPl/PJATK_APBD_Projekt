@@ -1,4 +1,19 @@
 ﻿@inherits LayoutComponentBase
+@inject ApiClient HttpClient
+@using Syncfusion.Blazor.Buttons
+@using FrontEnd.Utils
+
+@code {
+    protected override void OnInitialized()
+    {
+        HttpClient.OnLoginStateChange += StateHasChanged;
+    }
+
+    private void LogOut()
+    {
+        HttpClient.LogOut();
+    }
+}
 
 <div class="page">
     <div class="sidebar">
@@ -7,6 +22,10 @@
 
     <main>
         <div class="top-row px-4">
+            @if (HttpClient.IsLogin)
+            {
+                <SfButton @onclick="LogOut">Log out</SfButton>
+            }
         </div>
 
         <article class="content px-4">

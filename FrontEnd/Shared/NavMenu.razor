@@ -47,4 +47,9 @@
         _collapseNavMenu = !_collapseNavMenu;
     }
 
+    protected override void OnInitialized()
+    {
+        HttpClient.OnLoginStateChange += StateHasChanged;
+    }
+
 }

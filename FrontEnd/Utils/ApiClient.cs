@@ -11,12 +11,22 @@ public class ApiClient : HttpClient
 {
     private ISyncLocalStorageService? _localStorage;
     private NavigationManager? _navigationManager;
+    public event Action OnLoginStateChange;
 
+    private bool _isLogin;
+    
+    [CascadingParameter]
     public bool IsLogin
     {
-        get;
-        private set;
+        get => _isLogin;
+        private set
+        {
+            _isLogin = value;
+            OnLoginStateChange?.Invoke();
+        }
     }
+    
+    private const string AuthTokenStorageKey = "Auth-Token";
 
     public void SetAuthorization(string? token)
     {
@@ -36,7 +46,7 @@ public class ApiClient : HttpClient
             .DefaultRequestHeaders
             .Add(authName, "Bearer " + token);
         
-        _localStorage!.SetItemAsString("Auth-Token", token);
+        _localStorage!.SetItemAsString(AuthTokenStorageKey, token);
     }
 
     public void SetLocalStorage(ISyncLocalStorageService? syncLocalStorageService)
@@ -255,6 +265,13 @@ public class ApiClient : HttpClient
     public void SetNavigationManager(NavigationManager? navigationManager)
     {
         this._navigationManager = navigationManager;
+    }
+
+    public void LogOut()
+    {
+        IsLogin = false;
+        _localStorage?.RemoveItem(AuthTokenStorageKey);
+        _navigationManager.NavigateTo("/login");
     }
 }
 
