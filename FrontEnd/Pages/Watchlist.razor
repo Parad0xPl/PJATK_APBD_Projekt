@@ -3,7 +3,7 @@
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Buttons
 @using FrontEnd.Utils
-@inject ApiClient _httpClient
+@inject ApiClient HttpClient
 
 <PageTitle>Watchlist</PageTitle>
 
@@ -20,26 +20,28 @@
     <GridTemplates>
         <RowTemplate>
             @{
-                var WatchlistElement = (context as WatchlistData);
+                var watchlistElement = (context as WatchlistData);
             }
-            <td>
-                <img class="stock-logo" src="@WatchlistElement.ImageURL"/>
-            </td>
-            <td>
-                @WatchlistElement.Symbol
-            </td>
-            <td>
-                @WatchlistElement.Name
-            </td>
-            <td>
-                @WatchlistElement.Type
-            </td>
-            <td>
-                @WatchlistElement.Marker
-            </td>
-            <td>
-                <SfButton @onclick="() => RemoveWatchlist(WatchlistElement.Symbol)">Remove</SfButton>
-            </td>
+            @if(watchlistElement != null){
+                <td>
+                    <img class="stock-logo" src="@watchlistElement.ImageUrl" alt="@watchlistElement.Symbol Logo"/>
+                </td>
+                <td>
+                    @watchlistElement.Symbol
+                </td>
+                <td>
+                    @watchlistElement.Name
+                </td>
+                <td>
+                    @watchlistElement.Type
+                </td>
+                <td>
+                    @watchlistElement.Marker
+                </td>
+                <td>
+                    <SfButton @onclick="() => RemoveWatchlist(watchlistElement.Symbol)">Remove</SfButton>
+                </td>
+            }
         </RowTemplate>
     </GridTemplates>
 </SfGrid>
@@ -57,7 +59,7 @@
  
     protected override async Task OnInitializedAsync()
     {
-        var watchlist = await _httpClient.GetWatchlist();
+        var watchlist = await HttpClient.GetWatchlist();
         if (watchlist == null)
         {
             //TODO Handle error
@@ -68,7 +70,7 @@
 
     private async Task RemoveWatchlist(string watchlistElementName)
     {
-        var removeFromWatchlist = await _httpClient.RemoveFromWatchlist(watchlistElementName);
+        var removeFromWatchlist = await HttpClient.RemoveFromWatchlist(watchlistElementName);
         if (removeFromWatchlist)
         {
             DetailsList = DetailsList.Where(e => e.Symbol != watchlistElementName).ToList();

@@ -2,7 +2,7 @@
 
 public class WatchlistData
 {
-    public string ImageURL { get; set; } = null!;
+    public string ImageUrl { get; set; } = null!;
     public string Symbol { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string Type { get; set; } = null!;

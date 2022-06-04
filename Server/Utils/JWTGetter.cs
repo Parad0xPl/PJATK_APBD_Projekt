@@ -22,7 +22,7 @@ public static class JWTGetter
             );
             return Convert.ToInt32(accountId);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return null;
         }

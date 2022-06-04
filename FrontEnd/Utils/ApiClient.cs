@@ -3,15 +3,16 @@ using System.Net.Http.Json;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Shared.DTO;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace FrontEnd.Utils;
 
 public class ApiClient : HttpClient
 {
-    private ISyncLocalStorageService _localStorage;
-    private NavigationManager _navigationManager;
+    private ISyncLocalStorageService? _localStorage;
+    private NavigationManager? _navigationManager;
 
-    public bool isLogin
+    public bool IsLogin
     {
         get;
         private set;
@@ -19,7 +20,7 @@ public class ApiClient : HttpClient
 
     public void SetAuthorization(string token)
     {
-        isLogin = true;
+        IsLogin = true;
         var authName =
             "Authorization";
         var hasAuth = this
@@ -38,7 +39,7 @@ public class ApiClient : HttpClient
         _localStorage!.SetItemAsString("Auth-Token", token);
     }
 
-    public void SetLocalStorage(ISyncLocalStorageService syncLocalStorageService)
+    public void SetLocalStorage(ISyncLocalStorageService? syncLocalStorageService)
     {
         _localStorage = syncLocalStorageService;
     }
@@ -48,8 +49,8 @@ public class ApiClient : HttpClient
         var response = await GetAsync("api/refresh");
         if (!response.IsSuccessStatusCode)
         {
-            isLogin = false;
-            _navigationManager.NavigateTo("/login");
+            IsLogin = false;
+            _navigationManager?.NavigateTo("/login");
             return false;
         }
 
@@ -88,10 +89,12 @@ public class ApiClient : HttpClient
         return SendWithRefreshCheck(HttpMethod.Get, url);
     }
 
+/*
     private Task<HttpResponseMessage> PutWithRefreshCheck(string url)
     {
         return SendWithRefreshCheck(HttpMethod.Put, url);
     }
+*/
 
     private Task<HttpResponseMessage> DeleteWithRefreshCheck(string url)
     {
@@ -103,7 +106,7 @@ public class ApiClient : HttpClient
         return SendWithRefreshCheck(HttpMethod.Post, url);
     }
 
-    public async Task<TickerDetailsDTO?> GetDetails(string name)
+    public async Task<TickerDetailsDTO?> GetDetails(string? name)
     {
         using var response = await GetWithRefreshCheck($"/api/Stock/{name}");
         if (!response.IsSuccessStatusCode)
@@ -125,8 +128,7 @@ public class ApiClient : HttpClient
         var details = await response.Content
             .ReadFromJsonAsync<TickerSearchDTO>();
         
-        var searchAutocomplete = details
-            .Results
+        var searchAutocomplete = details?.Results
             .Select(e => 
                 new SearchData(e.Ticker, e.Name, e.PrimaryExchange))
             .ToList();
@@ -154,21 +156,25 @@ public class ApiClient : HttpClient
 
         var details = await response.Content
             .ReadFromJsonAsync<List<TickerDetailsDTO>>();
+        if (details == null)
+            return null;
+            
         return details.Select(
             e =>
             {
                 string imageUrl = "";
-                if (e.Results.Branding != null)
+                if (e.Results?.Branding != null)
                 {
-                    imageUrl = e.Results.Branding.LogoUrl.ToString();
+                    imageUrl = e.Results.Branding.LogoUrl?.ToString() ?? "";
                 }
+
                 return new WatchlistData
                 {
-                    ImageURL = imageUrl,
-                    Symbol = e.Results.Ticker,
-                    Name = e.Results.Name,
-                    Marker = e.Results.Market,
-                    Type = e.Results.Type,
+                    ImageUrl = imageUrl,
+                    Symbol = e.Results?.Ticker ?? "",
+                    Name = e.Results?.Name ?? "",
+                    Marker = e.Results?.Market ?? "",
+                    Type = e.Results?.Type ?? "",
                 };
             }).ToList();
     }
@@ -184,7 +190,7 @@ public class ApiClient : HttpClient
         return true;
     }
 
-    public async Task<List<GraphData>?> GetGraph(string name, PossibleGraphs type)
+    public async Task<List<GraphData>?> GetGraph(string? name, PossibleGraphs type)
     {
         string timespan;
         string from;
@@ -223,7 +229,7 @@ public class ApiClient : HttpClient
         }
 
         var aggregated = await response.Content.ReadFromJsonAsync<AggregatesDTO>();
-        if (aggregated.Results == null)
+        if (aggregated?.Results == null)
         {
             return null;
         }
@@ -231,17 +237,17 @@ public class ApiClient : HttpClient
         var result = aggregated.Results.Select(
             e => new GraphData
             {
-                x = DateTime.UnixEpoch.AddMilliseconds(e.T),
-                close = e.C,
-                high = e.H,
-                low = e.L,
-                open = e.O,
-                volume = e.V
+                X = DateTime.UnixEpoch.AddMilliseconds(e.T),
+                Close = e.C,
+                High = e.H,
+                Low = e.L,
+                Open = e.O,
+                Volume = e.V
             }).ToList();
         return result;
     }
 
-    public void setNavigationManager(NavigationManager? navigationManager)
+    public void SetNavigationManager(NavigationManager? navigationManager)
     {
         this._navigationManager = navigationManager;
     }
@@ -249,10 +255,10 @@ public class ApiClient : HttpClient
 
 public class GraphData
 {        
-    public DateTime x { get; set; }
-    public double open { get; set; }
-    public double low { get; set; }
-    public double close { get; set; }
-    public double high { get; set; }
-    public double volume { get; set; }
+    public DateTime X { get; set; }
+    public double Open { get; set; }
+    public double Low { get; set; }
+    public double Close { get; set; }
+    public double High { get; set; }
+    public double Volume { get; set; }
 }

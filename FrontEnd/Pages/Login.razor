@@ -25,10 +25,10 @@
     }
     </style>
 
-@inject ApiClient _HttpClient
+@inject ApiClient HttpClient
 @code {
-    private string UserLogin { get; set; }
-    private string UserPassword { get; set; }
+    private string? UserLogin { get; set; }
+    private string? UserPassword { get; set; }
     
     private string? ErrorMessage { get; set; }
 
@@ -36,12 +36,12 @@
     {
         ErrorMessage = null;
         
-        var LoginData = new LoginDataDTO
+        var loginData = new LoginDataDTO
         {
             Login = UserLogin,
             Password = UserPassword
         };
-        var result = await _HttpClient.PostAsJsonAsync("/api/login", LoginData);
+        var result = await HttpClient.PostAsJsonAsync("/api/login", loginData);
 
 
         if (!result.IsSuccessStatusCode)
@@ -63,7 +63,7 @@
 
         if (response != null)
         {
-            _HttpClient.SetAuthorization(response.JWTToken);
+            HttpClient.SetAuthorization(response.JWTToken);
         }
 
         Nav.NavigateTo("/");

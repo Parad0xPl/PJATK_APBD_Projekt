@@ -5,11 +5,11 @@ namespace Server.Utils;
 
 public static class PasswordHashing
 {
-    public static string HashPassword(string password, string salt)
+    public static string HashPassword(string? password, string salt)
     {
         var byteSalt = Convert.FromHexString(salt);
         var passwordHash = KeyDerivation.Pbkdf2(
-            password: password,
+            password: password ?? throw new ArgumentNullException(nameof(password)),
             salt: byteSalt,
             prf: KeyDerivationPrf.HMACSHA512,
             iterationCount: 100000,
@@ -26,7 +26,7 @@ public static class PasswordHashing
         return Convert.ToHexString(randomArray);
     }
 
-    public static bool Verify(string targetHash, string password, string salt)
+    public static bool Verify(string targetHash, string? password, string salt)
     {
         var hash = HashPassword(password, salt);
         return hash == targetHash;

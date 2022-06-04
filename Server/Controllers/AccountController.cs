@@ -122,9 +122,9 @@ public class AccountController : ControllerBase
         }
 
         var newToken = JWTGenerator.GenerateForPayload(jwtSecurityToken.Payload);
-        var newRefreshToken = await _refreshTokenService.GetNewTokenAsync(accountId);
+        var newRefreshToken = await _refreshTokenService.GetNewTokenAsync(accountId)?? throw new InvalidOperationException();
         
-        Response.Cookies.Append("Refresh-Token", newRefreshToken, opts);
+        Response.Cookies.Append("Refresh-Token", newRefreshToken , opts);
         return Ok(new LoginResponseDTO
         {
             JWTToken = newToken

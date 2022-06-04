@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using Server.Entities;
 using Server.Services;
 using Shared.DTO;
@@ -51,7 +50,7 @@ public class StockController : ControllerBase
 
         var detailsSerialized = JsonSerializer.Serialize(details);
 
-        if (details == null || details.Results == null)
+        if (details.Results?.Ticker == null)
         {
             return NotFound();
         }
@@ -183,9 +182,11 @@ public class StockController : ControllerBase
                 });
             await _stockContext.SaveChangesAsync();
         }
-        catch (Exception e)
-        {}
-            
+        catch (Exception)
+        {
+            // ignored
+        }
+
         return Ok();
     }
 

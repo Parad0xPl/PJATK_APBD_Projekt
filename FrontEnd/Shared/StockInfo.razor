@@ -6,63 +6,64 @@
 
 <div class="stock-info row">
     
-@if (details != null)
+@if (Details != null)
 {
     <div class="row">
         <div class="col-2">
-            <img style="max-height: 100%;max-width: 100%;" src="@details.Results.Branding.LogoUrl"/>
+            @if (Details.Results != null && 
+                 Details.Results.Branding != null && 
+                 Details.Results.Branding.LogoUrl != null)
+            {
+                <img style="max-height: 100%;max-width: 100%;" src="@Details.Results.Branding.LogoUrl" alt="@Details.Results.Ticker Logo"/>
+            }
         </div>
         <div class="col-7">
-            <h4>@details.Results.Name</h4>
+            <h4>@Details.Results?.Name</h4>
         </div>
         <div class="col-3">
             <SfButton @onclick="AddToWatchlist">Add to watchlist</SfButton>
         </div>
     </div>
     <div class="row stock-description">
-        <div class="col-12">
-            <span class="stock-description-info">Country:</span> @details.Results.Locale.ToUpper()
+        @if(Details.Results?.Locale != null){
+            <div class="col-12">
+                <span class="stock-description-info">Country:</span> @Details.Results.Locale.ToUpper()
+            </div>
+        }
+        @if(Details.Results?.SicDescription != null){
+            <div class="col-12">
+                <span class="stock-description-info">Industry:</span> @Details.Results.SicDescription.ToLower()
+            </div>
+        }
+        @if(Details.Results?.CurrencyName != null){
+            <div class="col-12">
+                <span class="stock-description-info">Currency:</span> @Details.Results.CurrencyName.ToUpper()
         </div>
-        <div class="col-12">
-            <span class="stock-description-info">Industry:</span> @details.Results.SicDescription.ToLower()
-        </div>
-        <div class="col-12">
-            <span class="stock-description-info">Currency:</span> @details.Results.CurrencyName.ToUpper()
-        </div>
-        <div class="col-12">
-            <span class="stock-description-info">Description:</span> @details.Results.Description
-        </div>
+        }
+        @if (Details.Results?.Description != null)
+        {
+            <div class="col-12">
+                <span class="stock-description-info">Description:</span> @Details.Results.Description
+            </div>
+        }
     </div>
 
     <div>
-        <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Today); }">Current Day</SfButton>
-        <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Week); }">1 week ago</SfButton>
-        <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Month); }">1 month ago</SfButton>
-        <SfButton @onclick="() => { UpdateGraph(PossibleGraphs.Quarter); }">3 month ago</SfButton>
+        <SfButton @onclick="async () => { await UpdateGraph(PossibleGraphs.Today); }">Current Day</SfButton>
+        <SfButton @onclick="async () => { await UpdateGraph(PossibleGraphs.Week); }">1 week ago</SfButton>
+        <SfButton @onclick="async () => { await UpdateGraph(PossibleGraphs.Month); }">1 month ago</SfButton>
+        <SfButton @onclick="async () => { await UpdateGraph(PossibleGraphs.Quarter); }">3 month ago</SfButton>
     </div>
 
     <div class="row">
-        <SfStockChart @ref="@Chart" Title="@Symbol" Theme="@theme" EnableSelector="false">
-            <StockChartEvents OnLoaded="@ChartLoaded"></StockChartEvents>
-            @* <StockChartPrimaryXAxis> *@
-            @*     <StockChartAxisMajorGridLines Width="0"></StockChartAxisMajorGridLines> *@
-            @*     <StockChartAxisCrosshairTooltip Enable="true"></StockChartAxisCrosshairTooltip> *@
-            @* </StockChartPrimaryXAxis> *@
-            @* <StockChartPrimaryYAxis> *@
-            @*     <StockChartAxisLineStyle Width="0"></StockChartAxisLineStyle> *@
-            @*     <StockChartAxisMajorTickLines Width="0"></StockChartAxisMajorTickLines> *@
-            @* </StockChartPrimaryYAxis> *@
+        <SfStockChart @ref="@Chart" Title="@Symbol" Theme="@Theme.Bootstrap5" EnableSelector="false">
             <StockChartTooltipSettings Enable="false"></StockChartTooltipSettings>
             <StockChartCrosshairSettings Enable="false"></StockChartCrosshairSettings>
             <StockChartSeriesCollection>
                 <StockChartSeries DataSource="@StockGraphData" Type="ChartSeriesType.Candle"
-                                  XName="x" High="high" Low="low" 
-                                  Open="open" Close="close" Volume="volume"></StockChartSeries>
+                                  XName="X" High="High" Low="Low" 
+                                  Open="Open" Close="Close" Volume="Volume"></StockChartSeries>
             </StockChartSeriesCollection>
-            @* <StockChartChartArea> *@
-            @*     <StockChartChartAreaBorder Width="0"></StockChartChartAreaBorder> *@
-            @* </StockChartChartArea> *@
-
         </SfStockChart>
     </div>
 }
@@ -87,76 +88,67 @@
     }
 </style>
 
-@inject ApiClient _HttpClient
+@inject ApiClient HttpClient
 @code {
-    private TickerDetailsDTO? details { get; set; }
-    private List<GraphData> StockGraphData { get; set; }
-    private SfStockChart Chart { get; set; }
+    private TickerDetailsDTO? Details { get; set; }
+    private List<GraphData> StockGraphData { get; set; } = new List<GraphData>();
+    private SfStockChart? Chart { get; set; }
     
     [Parameter]
-    public string Symbol { get; set; }
+    public string? Symbol { get; set; }
 
-    protected override Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        Console.WriteLine("Parameters change");
-        Fetch(Symbol);
-        return base.OnParametersSetAsync();
+        await Fetch(Symbol);
     }
 
-    public async Task AddToWatchlist()
+    private async Task AddToWatchlist()
     {
-        if (details == null)
+        if (Details?.Results == null)
         {
             return;
         }
-        var isSuccess = await _HttpClient.AddToWatchlist(details.Results.Ticker);
+        var isSuccess = await HttpClient.AddToWatchlist(Details.Results.Ticker ?? throw new InvalidOperationException());
         if (!isSuccess)
         {
             //Error
+            //TODO 
             return;
         }
         //Success
-        return;
     }
     
-    Theme theme = Theme.Bootstrap5;
-    public async Task Fetch(string symbol)
+    private async Task Fetch(string? symbol)
     {
-        var response = await _HttpClient.GetDetails(symbol);
+        var response = await HttpClient.GetDetails(symbol);
         if (response == null)
         {
             return;
         }
-        details = response;
+        Details = response;
         StateHasChanged();
-        var graphDatas = await _HttpClient.GetGraph(symbol, PossibleGraphs.Today);
-        if (graphDatas == null)
+        var graphData = await HttpClient.GetGraph(symbol, PossibleGraphs.Today);
+        if (graphData == null)
         {
             return;
         }
-        StockGraphData = graphDatas;
-        Chart.Refresh();
+        StockGraphData = graphData;
+        Chart?.Refresh();
     }
 
-    public async Task UpdateGraph(PossibleGraphs symbol)
+    private async Task UpdateGraph(PossibleGraphs symbol)
     {
-        var graphDatas = await _HttpClient.GetGraph(Symbol, symbol);
-        if (graphDatas == null)
+        var graphData = await HttpClient.GetGraph(Symbol, symbol);
+        if (graphData == null)
         {
             return;
         }
-        StockGraphData = graphDatas;
+        StockGraphData = graphData;
         StateHasChanged();
     }
     
     protected override async Task OnInitializedAsync()
     {
         await Fetch(Symbol);
-        await base.OnInitializedAsync();
     }
-
-    private void ChartLoaded(StockChartEventArgs obj)
-    {
-    }
-
 }

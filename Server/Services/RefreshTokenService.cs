@@ -57,7 +57,7 @@ public class RefreshTokenService : IRefreshTokenService
             .Where(e => e.Token == token)
             .SingleOrDefaultAsync();
         var result = t != null && t.AccountID == accountId;
-        if (result)
+        if (t != null && t.AccountID == accountId)
         {
             _stockContext.RefreshTokens.Remove(t);
             await _stockContext.SaveChangesAsync();

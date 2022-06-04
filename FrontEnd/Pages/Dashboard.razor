@@ -1,5 +1,5 @@
 ﻿@page "/"
-@inject ApiClient _httpClient
+@inject ApiClient HttpClient
 @using Syncfusion.Blazor.Data
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Buttons
@@ -10,15 +10,15 @@
 <h3>Dashboard</h3>
 <div class="row">
     <div class="col-9">
-        <SfAutoComplete TValue="string" TItem="SearchData" Placeholder="Type symbol" @bind-Value="@CurrentTicker">
+        <SfAutoComplete TValue="string" TItem="SearchData" Placeholder="Type symbol" @bind-Value="@_currentTicker">
             <SfDataManager  AdaptorInstance="@typeof(AutocompleteAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
             <AutoCompleteFieldSettings Value="Ticker"/>
             <AutoCompleteTemplates TItem="SearchData">
                 <ItemTemplate>
                     <div>
-                        <span class="ticker">@((context as SearchData).Ticker)</span>
-                        <span class="name">@((context as SearchData).Name)</span>
-                        <span class="exchange">@((context as SearchData).PrimaryExchange)</span>
+                        <span class="ticker">@context.Ticker</span>
+                        <span class="name">@context.Name</span>
+                        <span class="exchange">@context.PrimaryExchange</span>
                     </div>
                 </ItemTemplate>
             </AutoCompleteTemplates>
@@ -30,8 +30,8 @@
         </NavLink>
     </div>
 </div>
-@if(CurrentTicker != null && CurrentTicker.Length > 1){
-    <StockInfo Symbol="@CurrentTicker"></StockInfo>
+@if(_currentTicker != null && _currentTicker.Length > 1){
+    <StockInfo Symbol="@_currentTicker"></StockInfo>
 }
 
 <style>
@@ -39,20 +39,20 @@
 </style>
 
 @code {
-    private static ApiClient? _apiClient = null;
-    private string? CurrentTicker = null;
+    private static ApiClient? _apiClient;
+    private string? _currentTicker;
 
     protected override async Task OnInitializedAsync()
     {
-        _apiClient = _httpClient;
+        _apiClient = HttpClient;
         await base.OnInitializedAsync();
     }
 
     class AutocompleteAdaptor : DataAdaptor
     {
-        public override async Task<object> ReadAsync(DataManagerRequest dataManagerRequest, string key = null)
+        public override async Task<object> ReadAsync(DataManagerRequest dataManagerRequest, string? key = null)
         {
-            ApiClient client = _apiClient;
+            var client = _apiClient ?? throw new InvalidOperationException();
             string? filter = null;
             if (dataManagerRequest.Where != null)
             {
@@ -67,9 +67,9 @@
             if (filter != null && filter.Length >= 2)
             {
                 var searchDatas = await client.GetSearch(filter);
-                return searchDatas ?? new List<SearchData>{};
+                return searchDatas ?? new List<SearchData>();
             }
-            return new List<SearchData>{};
+            return new List<SearchData>();
         }
     }
     

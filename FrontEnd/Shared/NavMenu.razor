@@ -1,5 +1,5 @@
 ﻿@using FrontEnd.Utils
-@inject ApiClient _httpClient 
+@inject ApiClient HttpClient 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Stock Charts</a>
@@ -11,7 +11,7 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
-        @if(_httpClient.isLogin){
+        @if(HttpClient.IsLogin){
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                     <span class="oi oi-bar-chart" aria-hidden="true"></span> Dashboard
@@ -38,13 +38,13 @@
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
+    private bool _collapseNavMenu = true;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        _collapseNavMenu = !_collapseNavMenu;
     }
 
 }
