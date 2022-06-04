@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/{urlTicker?}"
 @inject ApiClient HttpClient
 @using Syncfusion.Blazor.Data
 @using Syncfusion.Blazor.DropDowns
@@ -61,6 +61,17 @@ else
 @code {
     private static ApiClient? _apiClient;
     private string? _currentTicker;
+
+    [Parameter]
+    public string? UrlTicker { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (UrlTicker != null)
+        {
+            _currentTicker = UrlTicker;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

@@ -45,6 +45,7 @@
                 </td>
                 <td>
                     <SfButton @onclick="() => RemoveWatchlist(watchlistElement.Symbol)">Remove</SfButton>
+                    <NavLink href='@("/"+watchlistElement.Symbol)'><SfButton>Details</SfButton></NavLink>
                 </td>
             }
         </RowTemplate>
