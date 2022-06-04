@@ -7,6 +7,8 @@
 
 <PageTitle>Watchlist</PageTitle>
 
+<ErrorMessage Message="@ErrorMessage"></ErrorMessage>
+
 <SfGrid DataSource="@DetailsList" AllowPaging="true">
     <GridPageSettings PageCount="5" PageSize="5"></GridPageSettings>
     <GridColumns>
@@ -72,7 +74,7 @@
         var watchlist = await HttpClient.GetWatchlist();
         if (watchlist == null)
         {
-            //TODO Handle error
+            ErrorMessage = "Can't fetch your watchlist. Try to login again or contact administrator";
             return;
         }
         DetailsList = watchlist;
@@ -86,5 +88,7 @@
             DetailsList = DetailsList.Where(e => e.Symbol != watchlistElementName).ToList();
         }
     }
+
+    public string? ErrorMessage { get; set; }
 
 }

@@ -8,11 +8,7 @@
 @inject NavigationManager Nav
 @inject ApiClient HttpClient
 
-@if(ErrorMessage != null){
-    <div class="alert alert-danger" role="alert">
-        @ErrorMessage
-    </div>
-}
+<ErrorMessage Message="@ErrorMessage"></ErrorMessage>
 
 <form @onsubmit="PostRegister">
     <SfTextBox Placeholder="Login" @bind-Value="Login"></SfTextBox><br>
@@ -52,7 +48,8 @@
         var registerData = new RegisterDataDTO()
         {
             Login = Login,
-            Password = Password
+            Password = Password,
+            Email = Email
         };
         var result = await HttpClient.PostAsJsonAsync("/api/register", registerData);
 
@@ -67,8 +64,6 @@
             {
                 ErrorMessage = result.ReasonPhrase;
             }
-            Console.WriteLine(result.Content.ToString());
-            Console.WriteLine();
             return;
         }
 

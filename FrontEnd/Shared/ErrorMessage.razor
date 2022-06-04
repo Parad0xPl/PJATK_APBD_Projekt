@@ -1,0 +1,30 @@
+﻿
+<div class="message-box">
+    @if(Message != null){
+        <div class="alert alert-danger" role="alert">
+            @Message
+        </div>
+    }
+</div>
+<style>
+    .message-box {
+        margin: 1em 0;
+    }
+</style>
+
+@code {
+
+    [Parameter]
+    public string? Message { get; set; } = null;
+
+    protected override void OnInitialized()
+    {
+        
+    }
+
+    protected override void OnParametersSet()
+    {
+        StateHasChanged();   
+    }
+
+}

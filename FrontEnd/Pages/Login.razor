@@ -8,11 +8,7 @@
 @inject NavigationManager Nav
 @inject ApiClient HttpClient
 
-@if(ErrorMessage != null){
-    <div class="alert alert-danger" role="alert">
-        @ErrorMessage
-    </div>
-}
+<ErrorMessage Message="@ErrorMessage"></ErrorMessage>
 
 <form @onsubmit="PostLogin">
     <SfTextBox Placeholder="Login" @bind-Value="UserLogin"></SfTextBox><br>
@@ -59,8 +55,6 @@
             {
                 ErrorMessage = result.ReasonPhrase;
             }
-            Console.WriteLine(result.Content.ToString());
-            Console.WriteLine();
             return;
         }
 

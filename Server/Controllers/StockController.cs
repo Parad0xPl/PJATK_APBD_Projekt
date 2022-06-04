@@ -36,7 +36,7 @@ public class StockController : ControllerBase
         TickerDetailsDTO? details;
         if (stocksCache != null)
         {
-            if (stocksCache.UpdateTime.AddHours(1).CompareTo(DateTime.Now) > 0)
+            if (stocksCache.UpdateTime.AddDays(1).CompareTo(DateTime.Now) > 0)
             {
                 details = JsonSerializer.Deserialize<TickerDetailsDTO>(stocksCache.RequestJson);
                 return Ok(details);
@@ -151,6 +151,30 @@ public class StockController : ControllerBase
             .Where(e => e.Ticker != null && e.Ticker.StartsWith(name))
             .ToList();
         return result;
+    }
+
+    [HttpGet]
+    [Route("watchlist/{name}")]
+    public async Task<IActionResult> GetIsOnWatchlist(string name)
+    {
+        var userId = Request.GetAccountId() ?? -1;
+        if (userId == -1)
+        {
+            return Unauthorized();
+        }
+
+        bool isOnList = await _stockContext.Watchlist
+            .Join(_stockContext.Stocks,
+                e => e.StockId,
+                e => e.Id, (e, s) => new
+                {
+                    StockName = s.Ticker,
+                    AccountId = e.AccountId
+                })
+            .Where(e => e.AccountId == userId && e.StockName == name)
+            .AnyAsync();
+
+        return isOnList ? Ok() : NotFound();
     }
 
     [HttpPost]

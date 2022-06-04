@@ -161,6 +161,16 @@ public class ApiClient : HttpClient
         return true;
     }
 
+    public async Task<bool> GetIsOnWatchlist(string name)
+    {
+        using var response = await GetWithRefreshCheck($"/api/Stock/watchlist/{name}");
+        if (!response.IsSuccessStatusCode)
+        {
+            return false;
+        }
+        return true;
+    }
+
     public async Task<List<WatchlistData>?> GetWatchlist()
     {
         using var response = await GetWithRefreshCheck($"/api/Stock/watchlist");

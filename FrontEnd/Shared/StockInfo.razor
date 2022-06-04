@@ -4,6 +4,8 @@
 @using global::Shared.DTO
 @using FrontEnd.Utils
 
+<ErrorMessage Message="@ErrorMessage"></ErrorMessage>
+
 <div class="stock-info row">
     
 @if (Details != null)
@@ -21,7 +23,7 @@
             <h4>@Details.Results?.Name</h4>
         </div>
         <div class="col-3">
-            <SfButton @onclick="AddToWatchlist">Add to watchlist</SfButton>
+            <SfButton @onclick="AddToWatchlist" Disabled="@(!_canBeAdded)">Add to watchlist</SfButton>
         </div>
     </div>
     <div class="row stock-description">
@@ -97,8 +99,13 @@
     [Parameter]
     public string? Symbol { get; set; }
 
+    private bool _canBeAdded = true;
+    private string? ErrorMessage { get; set; }
+
+
     protected override async Task OnParametersSetAsync()
     {
+        ErrorMessage = null;
         await Fetch(Symbol);
     }
 
@@ -111,29 +118,36 @@
         var isSuccess = await HttpClient.AddToWatchlist(Details.Results.Ticker ?? throw new InvalidOperationException());
         if (!isSuccess)
         {
-            //Error
-            //TODO 
+            ErrorMessage = $"Can't add '{Details.Results.Ticker}' to watchlist";
             return;
         }
-        //Success
+        _canBeAdded = false;
     }
     
     private async Task Fetch(string? symbol)
     {
+        if (symbol == null)
+        {
+            return;
+        }
+        var graphTask = UpdateGraph(PossibleGraphs.Today);
+        var canBeAddedTask = UpdateCanBeAdded(symbol);
         var response = await HttpClient.GetDetails(symbol);
         if (response == null)
         {
+            ErrorMessage = $"Can't get details of '{Details?.Results?.Ticker}'";
             return;
         }
         Details = response;
         StateHasChanged();
-        var graphData = await HttpClient.GetGraph(symbol, PossibleGraphs.Today);
-        if (graphData == null)
-        {
-            return;
-        }
-        StockGraphData = graphData;
-        Chart?.Refresh();
+        await graphTask;
+        await canBeAddedTask;
+    }
+
+    private async Task UpdateCanBeAdded(string symbol)
+    {
+        var isOnWatchlist = await HttpClient.GetIsOnWatchlist(symbol);
+        _canBeAdded = !isOnWatchlist;
     }
 
     private async Task UpdateGraph(PossibleGraphs symbol)
@@ -141,9 +155,11 @@
         var graphData = await HttpClient.GetGraph(Symbol, symbol);
         if (graphData == null)
         {
+            ErrorMessage = $"Can't get graph for '{Details?.Results?.Ticker}'";
             return;
         }
         StockGraphData = graphData;
+        Chart?.Refresh();
         StateHasChanged();
     }
     
