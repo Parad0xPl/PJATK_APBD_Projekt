@@ -16,6 +16,9 @@ builder.Services.AddScoped(sp =>
     var syncLocalStorageService = sp.GetService<ISyncLocalStorageService>();
     defaultHttpClient.SetLocalStorage(syncLocalStorageService);
 
+    var navigationManager = sp.GetService<Microsoft.AspNetCore.Components.NavigationManager>();
+    defaultHttpClient.setNavigationManager(navigationManager);
+
     var auth = syncLocalStorageService.GetItemAsString("Auth-Token");
     if (auth != null)
     {

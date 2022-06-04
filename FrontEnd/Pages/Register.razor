@@ -2,13 +2,35 @@
 <h3>Register</h3>
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Buttons
+@inject NavigationManager Nav
 
-<SfTextBox Placeholder="Login"></SfTextBox><br>
-<SfTextBox Placeholder="Password" Type="InputType.Password"></SfTextBox><br>
-<SfTextBox Placeholder="Repeat Password" Type="InputType.Password"></SfTextBox><br>
-<SfTextBox Placeholder="Email"></SfTextBox><br>
-<SfButton>Register</SfButton><SfButton>Cancel</SfButton>
+<form @onsubmit="PostRegister">
+    <SfTextBox Placeholder="Login" @bind-Value="Login"></SfTextBox><br>
+    <SfTextBox Placeholder="Password" Type="InputType.Password" @bind-Value="Password"></SfTextBox><br>
+    <SfTextBox Placeholder="Repeat Password" Type="InputType.Password" @bind-Value="PasswordRepeat"></SfTextBox><br>
+    <SfTextBox Placeholder="Email" @bind-Value="Email"></SfTextBox><br>
+    <SfButton @onclick="PostRegister">Register</SfButton><SfButton @onclick="GoToLogin">Cancel</SfButton>
+</form>
+<style>
+    form > * {
+        margin-top: 5px;
+    }
+</style>
 
 @code {
+    private string Login { get; set; }
+    private string Password { get; set; }
+    private string PasswordRepeat { get; set; }
+    private string Email { get; set; }
     
+    private void GoToLogin()
+    {
+        Nav.NavigateTo("/login");
+    }
+
+    private void PostRegister()
+    {
+        
+    }
+
 }

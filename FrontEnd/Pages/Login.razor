@@ -16,17 +16,12 @@
 <form @onsubmit="PostLogin">
     <SfTextBox Placeholder="Login" @bind-Value="UserLogin"></SfTextBox><br>
     <SfTextBox Placeholder="Password" Type="InputType.Password" @bind-Value="UserPassword"></SfTextBox><br>
-    <SfButton @onclick="PostLogin">Login</SfButton><SfButton>Register</SfButton>
+    <SfButton @onclick="PostLogin">Login</SfButton><SfButton @onclick="GoToRegister">Register</SfButton>
 </form>
  
     <style>
-    .e-panel-header {
-        background-color: rgba(0, 0, 0, .1);
-        text-align: center;
-    }
-    .e-panel-content {
-        text-align: center;
-        margin-top: 10px;
+    form > * {
+        margin-top: 5px;
     }
     </style>
 
@@ -71,7 +66,13 @@
             _HttpClient.SetAuthorization(response.JWTToken);
         }
 
-        Nav.NavigateTo("/dashboard");
+        Nav.NavigateTo("/");
         
     }
+
+    private void GoToRegister()
+    {
+        Nav.NavigateTo("/register");
+    }
+
 }

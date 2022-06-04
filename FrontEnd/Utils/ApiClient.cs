@@ -1,16 +1,25 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 using Shared.DTO;
 
 namespace FrontEnd.Utils;
 
-public partial class ApiClient : HttpClient
+public class ApiClient : HttpClient
 {
-    private ISyncLocalStorageService? _localStorage;
+    private ISyncLocalStorageService _localStorage;
+    private NavigationManager _navigationManager;
+
+    public bool isLogin
+    {
+        get;
+        private set;
+    }
 
     public void SetAuthorization(string token)
     {
+        isLogin = true;
         var authName =
             "Authorization";
         var hasAuth = this
@@ -39,6 +48,8 @@ public partial class ApiClient : HttpClient
         var response = await GetAsync("api/refresh");
         if (!response.IsSuccessStatusCode)
         {
+            isLogin = false;
+            _navigationManager.NavigateTo("/login");
             return false;
         }
 
@@ -228,7 +239,12 @@ public partial class ApiClient : HttpClient
                 volume = e.V
             }).ToList();
         return result;
-    } 
+    }
+
+    public void setNavigationManager(NavigationManager? navigationManager)
+    {
+        this._navigationManager = navigationManager;
+    }
 }
 
 public class GraphData
