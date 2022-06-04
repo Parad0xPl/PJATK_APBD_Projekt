@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using FrontEnd;
 using FrontEnd.Utils;
 using Blazored.LocalStorage;
+using Syncfusion.Blazor;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -10,6 +11,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 var defaultHttpClient = new ApiClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)};
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddSyncfusionBlazor();
 builder.Services.AddScoped(sp =>
 {
     var syncLocalStorageService = sp.GetService<ISyncLocalStorageService>();

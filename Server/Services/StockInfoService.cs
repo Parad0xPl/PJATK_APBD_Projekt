@@ -1,9 +1,5 @@
-﻿using System.Net.Http.Headers;
-using System.Text.Json;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
 using Microsoft.Net.Http.Headers;
-using Server.Entities;
 using Shared.DTO;
 
 namespace Server.Services;
@@ -11,7 +7,6 @@ namespace Server.Services;
 public class StockInfoService : IStockInfoService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
     private const string ApiUrl = "https://api.polygon.io";
     private const string TickerEndpoint = "/v3/reference/tickers";
     private const string SearchEndpoint = "/v3/reference/tickers?limit=1000&search=";
@@ -28,19 +23,18 @@ public class StockInfoService : IStockInfoService
     }
     public StockInfoService(HttpClient httpClient, string apiKey)
     {
-        _apiKey = apiKey;
         _httpClient = httpClient;
         _httpClient.BaseAddress = new Uri(ApiUrl);
         _httpClient.DefaultRequestHeaders.Add(
-            HeaderNames.Authorization, "Bearer " + _apiKey);
+            HeaderNames.Authorization, "Bearer " + apiKey);
     }
     public StockInfoService(HttpClient httpClient, IConfiguration configuration)
     {
-        _apiKey = configuration["PolygonAPIKey"];
+        var apiKey = configuration["PolygonAPIKey"];
         _httpClient = httpClient;
         _httpClient.BaseAddress = new Uri(ApiUrl);
         _httpClient.DefaultRequestHeaders.Add(
-            HeaderNames.Authorization, "Bearer " + _apiKey);
+            HeaderNames.Authorization, "Bearer " + apiKey);
     }
 
     public async Task<TickerDetailsDTO?> GetDetails(string name)

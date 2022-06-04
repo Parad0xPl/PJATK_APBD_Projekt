@@ -2,7 +2,7 @@
 
 namespace Server.Utils;
 
-public static class JWTGetter
+public static class JwtGetter
 {
     public static int? GetAccountId(this HttpRequest request)
     {

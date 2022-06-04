@@ -24,7 +24,10 @@
             }
             @if(watchlistElement != null){
                 <td>
-                    <img class="stock-logo" src="@watchlistElement.ImageUrl" alt="@watchlistElement.Symbol Logo"/>
+                    @if (watchlistElement.ImageUrl != "")
+                    {
+                        <img class="stock-logo" src="@watchlistElement.ImageUrl" alt="@watchlistElement.Symbol Logo"/>
+                    }
                 </td>
                 <td>
                     @watchlistElement.Symbol

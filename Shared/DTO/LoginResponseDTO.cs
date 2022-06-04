@@ -2,5 +2,5 @@
 
 public class LoginResponseDTO
 {
-    public string JWTToken { get; set; }
+    public string? JwtToken { get; set; }
 }

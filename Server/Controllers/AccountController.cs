@@ -1,11 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
 using Server.Entities;
 using Server.Services;
 using Server.Utils;
 using Shared.DTO;
+using Shared.Entities;
 
 namespace Server.Controllers;
 
@@ -15,7 +15,7 @@ public class AccountController : ControllerBase
 {
     private readonly StockContext _stockContext;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly CookieOptions opts = new CookieOptions
+    private readonly CookieOptions _opts = new CookieOptions
     {
         Expires = DateTimeOffset.Now.AddDays(7)
     };
@@ -29,6 +29,11 @@ public class AccountController : ControllerBase
     [Route("login")]
     public async Task<IActionResult> Login([FromBody] LoginDataDTO loginData)
     {
+        if (loginData.Login == null && loginData.Password == null)
+        {
+            return BadRequest();
+        }
+        
         var user = await _stockContext.Accounts
             .Where(e => e.Login == loginData.Login)
             .SingleOrDefaultAsync();
@@ -37,18 +42,18 @@ public class AccountController : ControllerBase
             return StatusCode(500, "Can't login");
         }
 
-        if (!PasswordHashing.Verify(user.PasswordHash, loginData.Password, user.PasswordSalt))
+        if (!PasswordHashing.Verify(user.PasswordHash, loginData.Password!, user.PasswordSalt))
         {
             return StatusCode(500, "Can't login");
         }
 
         var refreshToken = await _refreshTokenService.GetNewTokenAsync(user) ?? "";
 
-        Response.Cookies.Append("Refresh-Token", refreshToken, opts);
+        Response.Cookies.Append("Refresh-Token", refreshToken, _opts);
         
         return Ok(new LoginResponseDTO
         {
-            JWTToken = JWTGenerator.Generate(user)
+            JwtToken = JwtGenerator.Generate(user)
         });
     }
 
@@ -56,6 +61,10 @@ public class AccountController : ControllerBase
     [Route("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDataDTO registerData)
     {
+        if (registerData.Login == null || registerData.Password == null)
+        {
+            return BadRequest();
+        }
         var user = await _stockContext.Accounts
             .Where(e => e.Login == registerData.Login)
             .SingleOrDefaultAsync();
@@ -121,13 +130,13 @@ public class AccountController : ControllerBase
             return Problem();
         }
 
-        var newToken = JWTGenerator.GenerateForPayload(jwtSecurityToken.Payload);
+        var newToken = JwtGenerator.GenerateForPayload(jwtSecurityToken.Payload);
         var newRefreshToken = await _refreshTokenService.GetNewTokenAsync(accountId)?? throw new InvalidOperationException();
         
-        Response.Cookies.Append("Refresh-Token", newRefreshToken , opts);
+        Response.Cookies.Append("Refresh-Token", newRefreshToken , _opts);
         return Ok(new LoginResponseDTO
         {
-            JWTToken = newToken
+            JwtToken = newToken
         });
     }
 }

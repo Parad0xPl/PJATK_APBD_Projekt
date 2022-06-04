@@ -1,13 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
-using Server.Entities;
+using Shared.Entities;
 
 namespace Server.Utils;
 
-public static class JWTGenerator
+public static class JwtGenerator
 {
     private static SigningCredentials? Credentials { get; set; }
     
@@ -27,7 +26,7 @@ public static class JWTGenerator
         payload.AddClaim(claimExpDate);
         var jwtToken = new JwtSecurityToken(jwtHeader, payload);
         
-        return new JwtSecurityTokenHandler().WriteToken(jwtToken);;
+        return new JwtSecurityTokenHandler().WriteToken(jwtToken);
     }
     
     public static string Generate(Account account)

@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Server.Entities;
+using Shared.Entities;
 
 namespace Server.Services;
 

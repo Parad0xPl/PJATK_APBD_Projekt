@@ -30,7 +30,7 @@
         </NavLink>
     </div>
 </div>
-@if(_currentTicker != null && _currentTicker.Length > 1){
+@if(_currentTicker is {Length: > 1 }){
     <StockInfo Symbol="@_currentTicker"></StockInfo>
 }
 
@@ -52,7 +52,11 @@
     {
         public override async Task<object> ReadAsync(DataManagerRequest dataManagerRequest, string? key = null)
         {
-            var client = _apiClient ?? throw new InvalidOperationException();
+            if (_apiClient == null)
+            {
+                return new List<SearchData>();
+            }
+            var client = _apiClient;
             string? filter = null;
             if (dataManagerRequest.Where != null)
             {
@@ -64,10 +68,10 @@
                     }
                 }
             }
-            if (filter != null && filter.Length >= 2)
+            if (filter is {Length: >= 2 })
             {
-                var searchDatas = await client.GetSearch(filter);
-                return searchDatas ?? new List<SearchData>();
+                var searchData = await client.GetSearch(filter);
+                return searchData ?? new List<SearchData>();
             }
             return new List<SearchData>();
         }

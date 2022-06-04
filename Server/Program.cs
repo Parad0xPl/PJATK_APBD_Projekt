@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using Server.Entities;
 using Server.Services;
 using Server.Utils;
-using Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,10 +61,7 @@ builder.Services.AddAuthentication(opts =>
 
             return Task.CompletedTask;
         },
-        OnTokenValidated = context =>
-        {
-            return Task.CompletedTask;
-        }
+        OnTokenValidated = _ => Task.CompletedTask
     };
 });
 
@@ -99,6 +95,6 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 
-JWTGenerator.Init(builder.Configuration.GetValue<string>("JWTToken"));
+JwtGenerator.Init(builder.Configuration.GetValue<string>("JWTToken"));
 
 app.Run();

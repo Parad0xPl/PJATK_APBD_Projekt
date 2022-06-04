@@ -32,7 +32,7 @@ public class AggregatesResultDTO
 public class AggregatesDTO
 {
     [JsonPropertyName("ticker")]
-    public string Ticker { get; set; }
+    public string? Ticker { get; set; }
 
     [JsonPropertyName("queryCount")]
     public int QueryCount { get; set; }
@@ -44,13 +44,13 @@ public class AggregatesDTO
     public bool Adjusted { get; set; }
 
     [JsonPropertyName("results")]
-    public List<AggregatesResultDTO> Results { get; set; }
+    public List<AggregatesResultDTO>? Results { get; set; }
 
     [JsonPropertyName("status")]
-    public string Status { get; set; }
+    public string? Status { get; set; }
 
     [JsonPropertyName("request_id")]
-    public string RequestId { get; set; }
+    public string? RequestId { get; set; }
 
     [JsonPropertyName("count")]
     public int Count { get; set; }

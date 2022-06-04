@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shared.Entities;
 
 namespace Server.Entities;
 
@@ -28,7 +29,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .IsUnique();
 
         builder
-            .HasMany<ObservedStock>(e => e.Watchlist)
+            .HasMany(e => e.Watchlist)
             .WithOne();
     }
 }

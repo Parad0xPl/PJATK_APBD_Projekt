@@ -6,6 +6,7 @@ using Server.Entities;
 using Server.Services;
 using Shared.DTO;
 using Server.Utils;
+using Shared.Entities;
 
 namespace Server.Controllers;
 
@@ -37,7 +38,7 @@ public class StockController : ControllerBase
         {
             if (stocksCache.UpdateTime.AddHours(1).CompareTo(DateTime.Now) > 0)
             {
-                details = JsonSerializer.Deserialize<TickerDetailsDTO>(stocksCache.RequestJSON);
+                details = JsonSerializer.Deserialize<TickerDetailsDTO>(stocksCache.RequestJson);
                 return Ok(details);
             }
         }
@@ -60,13 +61,13 @@ public class StockController : ControllerBase
             await _stockContext.Stocks.AddAsync(new Stock
             {
                 Ticker = details.Results.Ticker,
-                RequestJSON = detailsSerialized,
+                RequestJson = detailsSerialized,
                 UpdateTime = DateTime.Now
             });
         }
         else
         {
-            stocksCache.RequestJSON = detailsSerialized;
+            stocksCache.RequestJson = detailsSerialized;
             stocksCache.UpdateTime = DateTime.Now;
         }
         await _stockContext.SaveChangesAsync();
@@ -141,13 +142,13 @@ public class StockController : ControllerBase
 
     private TickerSearchDTO? FilterSearch(TickerSearchDTO? result, string name)
     {
-        if (result == null)
+        if (result?.Results == null)
         {
             return null;
         }
         result.Results = result
             .Results
-            .Where(e => e.Ticker.StartsWith(name))
+            .Where(e => e.Ticker != null && e.Ticker.StartsWith(name))
             .ToList();
         return result;
     }
@@ -241,7 +242,7 @@ public class StockController : ControllerBase
 
         var listDto = list.Select(e =>
         {
-            return JsonSerializer.Deserialize<TickerDetailsDTO>(e.RequestJSON);
+            return JsonSerializer.Deserialize<TickerDetailsDTO>(e.RequestJson);
         }).ToList();
         return Ok(listDto);
     }

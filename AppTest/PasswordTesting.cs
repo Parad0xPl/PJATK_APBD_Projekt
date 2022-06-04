@@ -14,7 +14,7 @@ public class PasswordTests
     }
 
     [Test]
-    public async Task RandomPassword()
+    public Task RandomPassword()
     {
         var password = Convert.ToHexString(RandomNumberGenerator.GetBytes(8));
         
@@ -26,5 +26,6 @@ public class PasswordTests
         Assert.AreEqual(hashA, hashB);
         
         Assert.True(PasswordHashing.Verify(hashA, password, salt));
+        return Task.CompletedTask;
     }
 }

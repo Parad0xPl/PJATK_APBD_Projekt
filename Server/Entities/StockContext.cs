@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Shared.Entities;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Server.Entities;

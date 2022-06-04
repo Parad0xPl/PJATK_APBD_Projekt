@@ -2,9 +2,9 @@
 
 public class SearchData
 {
-    public string Ticker { get; set; }
-    public string Name { get; set; }
-    public string PrimaryExchange { get; set; }
+    public string? Ticker { get; set; }
+    public string? Name { get; set; }
+    public string? PrimaryExchange { get; set; }
 
     public SearchData()
     {
@@ -12,11 +12,11 @@ public class SearchData
         Name = "";
         PrimaryExchange = "";
     }
-    public SearchData(string Ticker, string Name, string PrimaryExchange)
+    public SearchData(string? ticker, string? name, string? primaryExchange)
     {
-        this.Ticker = Ticker;
-        this.Name = Name;
-        this.PrimaryExchange = PrimaryExchange;
+        this.Ticker = ticker;
+        this.Name = name;
+        this.PrimaryExchange = primaryExchange;
     }
     public override string ToString()
     {

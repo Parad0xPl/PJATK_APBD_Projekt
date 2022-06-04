@@ -1,9 +1,9 @@
-﻿namespace Server.Entities;
+﻿namespace Shared.Entities;
 
 public class CachedImage
 {
-    public string Url { get; set; }
-    public byte[] Data { get; set; }
-    public string Type { get; set; }
+    public string Url { get; set; } = null!;
+    public byte[] Data { get; set; } = null!;
+    public string Type { get; set; } = null!;
     public DateTime CreationDate { get; set; }
 }

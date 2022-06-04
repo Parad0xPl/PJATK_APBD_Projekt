@@ -18,7 +18,7 @@ public class ApiClient : HttpClient
         private set;
     }
 
-    public void SetAuthorization(string token)
+    public void SetAuthorization(string? token)
     {
         IsLogin = true;
         var authName =
@@ -60,7 +60,7 @@ public class ApiClient : HttpClient
             return false;
         }
         //TODO go to login if can't refresh
-        SetAuthorization(readFromJsonAsync.JWTToken);
+        SetAuthorization(readFromJsonAsync.JwtToken);
         return true;
     }
 
@@ -127,8 +127,13 @@ public class ApiClient : HttpClient
 
         var details = await response.Content
             .ReadFromJsonAsync<TickerSearchDTO>();
+
+        if (details?.Results == null)
+        {
+            return null;
+        }
         
-        var searchAutocomplete = details?.Results
+        var searchAutocomplete = details.Results
             .Select(e => 
                 new SearchData(e.Ticker, e.Name, e.PrimaryExchange))
             .ToList();
