@@ -61,7 +61,7 @@ public class AccountController : ControllerBase
     [Route("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDataDTO registerData)
     {
-        if (registerData.Login == null || registerData.Password == null)
+        if (registerData.Login == null || registerData.Password == null || registerData.Email == null)
         {
             return BadRequest();
         }
@@ -88,7 +88,6 @@ public class AccountController : ControllerBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             return StatusCode(500);
         }
 
@@ -127,7 +126,7 @@ public class AccountController : ControllerBase
         );
         if (!result)
         {
-            return Problem();
+            return Unauthorized();
         }
 
         var newToken = JwtGenerator.GenerateForPayload(jwtSecurityToken.Payload);

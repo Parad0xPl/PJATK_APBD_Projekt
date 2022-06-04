@@ -18,6 +18,9 @@ public class StockConfiguration : IEntityTypeConfiguration<Stock>
             .Property(e => e.RequestJson)
             .HasMaxLength(4000); // Fit whole json
 
+        builder.HasIndex(e => e.Ticker)
+            .IsUnique();
+
         builder.HasMany<ObservedStock>(e => e.Observers)
             .WithOne();
     }

@@ -35,34 +35,40 @@ public class StockInfoService : IStockInfoService
         _httpClient.BaseAddress = new Uri(ApiUrl);
         _httpClient.DefaultRequestHeaders.Add(
             HeaderNames.Authorization, "Bearer " + apiKey);
+        
     }
 
-    public async Task<TickerDetailsDTO?> GetDetails(string name)
+    public async Task<TickerDetailsDTO?> GetDetails(string name, Uri hostUri)
     {
         var response = await _httpClient.GetAsync(TickerEndpoint + "/" + name);
         var messageStream = await response.Content.ReadAsStreamAsync();
         var ticker = await JsonSerializer.DeserializeAsync<TickerDetailsDTO>(messageStream);
+
+        var host = hostUri.Host;
+        var port = hostUri.Port;
+        var scheme = hostUri.Scheme;
+
         if (ticker != null && ticker.Results != null && ticker.Results.Branding != null)
         {
             if (ticker.Results.Branding.IconUrl != null)
             {
-                ticker.Results.Branding.IconUrl = ChangeToProxy(ticker.Results.Branding.IconUrl);
+                ticker.Results.Branding.IconUrl = ChangeToProxy(ticker.Results.Branding.IconUrl, scheme, host, port);
             }
 
             if (ticker.Results.Branding.LogoUrl != null)
             {
-                ticker.Results.Branding.LogoUrl = ChangeToProxy(ticker.Results.Branding.LogoUrl);
+                ticker.Results.Branding.LogoUrl = ChangeToProxy(ticker.Results.Branding.LogoUrl, scheme, host, port);
             }
         }
         return ticker;
     }
 
-    private Uri ChangeToProxy(Uri brandingIconUrl)
+    private Uri ChangeToProxy(Uri brandingIconUrl, string scheme, string host, int port)
     {
         var builder = new UriBuilder(brandingIconUrl);
-        builder.Scheme = "http";
-        builder.Host = "localhost";
-        builder.Port = 5290;
+        builder.Scheme = scheme;
+        builder.Host = host;
+        builder.Port = port;
         builder.Path = "/api/stock/image"+builder.Path.Substring(13);
         return builder.Uri;
     }

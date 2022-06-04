@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Entities;
@@ -43,7 +44,7 @@ public class StockController : ControllerBase
             }
         }
 
-        details = await _stockInfoService.GetDetails(name);
+        details = await _stockInfoService.GetDetails(name, new Uri(HttpContext.Request.GetDisplayUrl()));
         if (details == null)
         {
             return NotFound();
@@ -78,8 +79,22 @@ public class StockController : ControllerBase
     [Route("{name}/graph/{timespan}/{from}/{to}")]
     public async Task<IActionResult> GetGraph(string name, string timespan, string from, string to)
     {
-        DateOnly fromDate = DateOnly.Parse(from);
-        DateOnly toDate = DateOnly.Parse(to);
+        if (name.Length < 2)
+        {
+            return BadRequest();
+        }
+        
+        DateOnly fromDate;
+        DateOnly toDate;
+        try
+        { 
+            fromDate = DateOnly.Parse(from);
+            toDate = DateOnly.Parse(to);
+        }
+        catch (Exception)
+        {
+            return BadRequest();
+        }
         var details = await _stockInfoService.GetGraphData(name, timespan, fromDate, toDate);
         if (details == null)
         {
@@ -140,7 +155,7 @@ public class StockController : ControllerBase
         return Ok(FilterSearch(details, name));
     }
 
-    private TickerSearchDTO? FilterSearch(TickerSearchDTO? result, string name)
+    private static TickerSearchDTO? FilterSearch(TickerSearchDTO? result, string name)
     {
         if (result?.Results == null)
         {
@@ -157,13 +172,17 @@ public class StockController : ControllerBase
     [Route("watchlist/{name}")]
     public async Task<IActionResult> GetIsOnWatchlist(string name)
     {
+        if (name.Length < 2)
+        {
+            return BadRequest();
+        }
         var userId = Request.GetAccountId() ?? -1;
         if (userId == -1)
         {
             return Unauthorized();
         }
 
-        bool isOnList = await _stockContext.Watchlist
+        var isOnList = await _stockContext.Watchlist
             .Join(_stockContext.Stocks,
                 e => e.StockId,
                 e => e.Id, (e, s) => new
@@ -181,7 +200,10 @@ public class StockController : ControllerBase
     [Route("watchlist/{name}")]
     public async Task<IActionResult> AddToWatchlist(string name)
     {
-        
+        if (name.Length < 2)
+        {
+            return BadRequest();
+        }
         var stock = await _stockContext.Stocks
             .Where(e => e.Ticker == name)
             .SingleOrDefaultAsync();
@@ -209,7 +231,7 @@ public class StockController : ControllerBase
         }
         catch (Exception)
         {
-            // ignored
+            return StatusCode(500);
         }
 
         return Ok();
@@ -219,6 +241,10 @@ public class StockController : ControllerBase
     [Route("watchlist/{name}")]
     public async Task<IActionResult> RemoveToWatchlist(string name)
     {
+        if (name.Length < 2)
+        {
+            return BadRequest();
+        }
         var userId = Request.GetAccountId() ?? -1;
         if (userId == -1)
         {
@@ -277,7 +303,7 @@ public class StockController : ControllerBase
     public async Task<IActionResult> ProxyImage(string url)
     {
         var images = await _stockContext
-            .Cached
+            .CachedImages
             .Where(e => e.Url == url)
             .SingleOrDefaultAsync();
         if (images != null)
@@ -286,9 +312,6 @@ public class StockController : ControllerBase
         }
 
         var image = await _stockInfoService.GetImage(url);
-        // var image = Convert.FromBase64String(
-        //     "iVBORw0KGgoAAAANSUhEUgAAAJYAAACWBAMAAADOL2zRAAAAG1BMVEXMzMyWlpaqqqq3t7fFxcW+vr6xsbGjo6OcnJyLKnDGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABAElEQVRoge3SMW+DMBiE4YsxJqMJtHOTITPeOsLQnaodGImEUMZEkZhRUqn92f0MaTubtfeMh/QGHANEREREREREREREtIJJ0xbH299kp8l8FaGtLdTQ19HjofxZlJ0m1+eBKZcikd9PWtXC5DoDotRO04B9YOvFIXmXLy2jEbiqE6Df7DTleA5socLqvEFVxtJyrpZFWz/pHM2CVte0lS8g2eDe6prOyqPglhzROL+Xye4tmT4WvRcQ2/m81p+/rdguOi8Hc5L/8Qk4vhZzy08DduGt9eVQyP2qoTM1zi0/uf4hvBWf5c77e69Gf798y08L7j0RERERERERERH9P99ZpSVRivB/rgAAAABJRU5ErkJggg==");
-        // await Response.Body.WriteAsync(image);
         if (image == null)
         {
             return NotFound();
@@ -298,7 +321,7 @@ public class StockController : ControllerBase
         var imageType = image.Item1 ?? "image/png";
 
         await _stockContext
-            .Cached
+            .CachedImages
             .AddAsync(new CachedImage
             {
                 Url = url,
